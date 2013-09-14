@@ -2,10 +2,9 @@
 
 import os
 import ftplib
-import whoosh
-import whoosh.fields
-import whoosh.index
-import whoosh.qparser
+from whoosh.fields import Schema, TEXT, ID, NUMERIC
+from whoosh.index import create_in, open_dir
+from whoosh.qparser import QueryParser
 
 class FTP_Indexer(ftplib.FTP):
     def __init__(self, index, address, user, passwd):
@@ -40,12 +39,12 @@ class Index(object):
         if not os.path.isdir(indexdir):
             os.mkdir(indexdir)
         if os.listdir(indexdir) == []:
-            schema = whoosh.fields.Schema(filename=whoosh.fields.TEXT(stored=True),
-                                          path=whoosh.fields.ID(stored=True),
-                                          size=whoosh.fields.NUMERIC(stored=True))
-            self.db = whoosh.index.create_in('index', schema)
+            schema = Schema(filename=TEXT(stored=True),
+                                          path=ID(stored=True),
+                                          size=NUMERIC(stored=True))
+            self.db = create_in('index', schema)
         else:
-            self.db = whoosh.index.open_dir('index')
+            self.db = open_dir('index')
 
     def start(self):
         self.writer = self.db.writer()
@@ -55,7 +54,7 @@ class Index(object):
 
     def search(self, txt):
         with self.db.searcher() as searcher:
-            parser = whoosh.qparser.QueryParser('filename', self.db.schema)
+            parser = QueryParser('filename', self.db.schema)
             query = parser.parse(txt)
             results = searcher.search(query)
             print(results[:])
