@@ -40,9 +40,10 @@ class Index(ftplib.FTP):
     def _index(self, filename, dir, size):
         self.writer.add_document(filename=filename, path=dir, size=size)
 
-    def search(self, txt):
-        with self.db.searcher() as searcher:
-            parser = whoosh.qparser.QueryParser('filename', self.db.schema)
+    def search(self, dir, txt):
+        db = whoosh.index.open_dir(dir)
+        with db.searcher() as searcher:
+            parser = whoosh.qparser.QueryParser('filename', db.schema)
             parser.add_plugin(whoosh.qparser.FuzzyTermPlugin())
             query = parser.parse(txt)
             results = searcher.search(query)
@@ -51,4 +52,4 @@ class Index(ftplib.FTP):
 if __name__ == '__main__':
     index = Index('localhost', 'rez', '35zero')
     index.scan()
-    index.search('*pokemon*')
+    index.search('index', '*pokemon*')
