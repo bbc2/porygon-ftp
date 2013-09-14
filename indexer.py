@@ -1,24 +1,22 @@
 #!/usr/bin/env python
 
+import os
 import ftplib
 import whoosh
 import whoosh.fields
 import whoosh.index
 import whoosh.qparser
 
-class Index(ftplib.FTP):
-    def __init__(self, address, user, passwd):
+class FTP_Indexer(ftplib.FTP):
+    def __init__(self, index, address, user, passwd):
         ftplib.FTP.__init__(self, address, timeout=5)
         self.login(user=user, passwd=passwd)
-        schema = whoosh.fields.Schema(filename=whoosh.fields.TEXT(stored=True),
-                                      path=whoosh.fields.ID(stored=True),
-                                      size=whoosh.fields.NUMERIC(stored=True))
-        self.db = whoosh.index.create_in('index', schema)
+        self.index = index
 
     def scan(self):
-        self.writer = self.db.writer()
+        self.index.start()
         self._scan()
-        self.writer.commit()
+        self.index.commit()
 
     def _scan(self):
         dirs = self.nlst()
@@ -33,12 +31,27 @@ class Index(ftplib.FTP):
                 self.sendcmd("TYPE i")
                 size = self.size(dir)
                 print(path, dir, size)
-                self._index(filename, path, size // 1024)
+                self.index.add(filename, path, size // 1024)
             finally:
                 self.cwd(path)
 
-    def _index(self, filename, dir, size):
-        self.writer.add_document(filename=unicode(filename), path=unicode(dir), size=unicode(size))
+class Index(object):
+    def __init__(self, indexdir):
+        if not os.path.isdir(indexdir):
+            os.mkdir(indexdir)
+        if os.listdir(indexdir) == []:
+            schema = whoosh.fields.Schema(filename=whoosh.fields.TEXT(stored=True),
+                                          path=whoosh.fields.ID(stored=True),
+                                          size=whoosh.fields.NUMERIC(stored=True))
+            self.db = whoosh.index.create_in('index', schema)
+        else:
+            self.db = whoosh.index.open_dir('index')
+
+    def start(self):
+        self.writer = self.db.writer()
+
+    def commit(self):
+        self.writer.commit()
 
     def search(self, txt):
         with self.db.searcher() as searcher:
@@ -47,7 +60,11 @@ class Index(ftplib.FTP):
             results = searcher.search(query)
             print(results[:])
 
+    def add(self, filename, dir, size):
+        self.writer.add_document(filename=unicode(filename), path=unicode(dir), size=unicode(size))
+
 if __name__ == '__main__':
-    index = Index('localhost', 'rez', '35zero')
-    index.scan()
+    index = Index('index')
+    ftp = FTP_Indexer(index, 'localhost', 'rez', '35zero')
+    ftp.scan()
     index.search(u'*pokemon*')
