@@ -69,7 +69,6 @@ class Index(object):
 
 if __name__ == '__main__':
     index = Index('index')
-    #ftp = FTP_Indexer(index, 'localhost', 'rez', '35zero')
-    ftp = FTP_Indexer(index, 'mario.rez', 'rez', 'rez')
+    ftp = FTP_Indexer(index, 'localhost', 'rez', '35zero')
     ftp.scan()
     print(index.search(u'*pokemon*'))
