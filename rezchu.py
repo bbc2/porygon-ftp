@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+import os
 from flask import Flask, render_template, request, url_for
 from indexer import Index
 app = Flask(__name__)
@@ -18,6 +19,7 @@ def search():
         hits = index.search(' '.join(['*%s*' % word for word in request.form['query'].split()]))
         for hit in hits:
             hit['size'] = sizeof_fmt(int(hit['size']) * 1024)
+            hit['url'] = 'ftp://rez:rez@%s%s' % (hit['host'], os.path.join(hit['path'], hit['filename']))
         return render_template('search.html', hits=hits, hit_page=True)
     else:
         return render_template('search.html')
