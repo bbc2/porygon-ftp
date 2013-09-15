@@ -1,28 +1,57 @@
 <!doctype html>
 <html>
 <head>
-<title>Rezchu</title>
+  <meta charset="UTF-8">
+  <title>Rezchu</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-  <form action="." method="post">
-    <p>
-    <input type="text" name="query" />
-    </p>
-    <p>
-    <input type="submit" value="Chu !" />
-    </p>
-  </form>
-  {% if hits %}
-  <p>
-    Resultats
-    <ul>
+  <div id="all" {% if hit_page %}class="hit_page"{% endif %}>
+    <header>
+      rezchu
+    </header>
+    <form action="." method="post">
+      <table>
+        {% if hit_page %}
+        <tr>
+          <td>
+          <input type="text" name="query" />
+          </td>
+          <td>
+          <input type="submit" value="Go" class="hit_page" />
+          </td>
+          </p>
+        </tr>
+        {% else %}
+        <tr>
+          <td>
+          <input type="text" name="query" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="submit" value="Chu !" />
+          </td>
+          </p>
+        </tr>
+        {% endif %}
+      </table>
+    </form>
+    {% if hits %}
+    <table id="hits">
       {% for hit in hits %}
-      <li>
-      {{ hit.path }} <strong>{{ hit.filename }}</strong> ({{ hit.size }}&nbsp;ko)
-      </li>
+      <tr>
+        <td class="host">{{ hit.host }}</td>
+        <td class="path">{{ hit.path }}</td>
+        <td class="filename">{{ hit.filename }}</td>
+        <td class="size">{{ hit.size }}</td>
+      </tr>
       {% endfor %}
-    </ul>
-  </p>
-  {% endif %}
+    </table>
+    {% endif %}
+    <footer>
+      bbc
+    </footer>
+  </div>
 </body>
 </html>

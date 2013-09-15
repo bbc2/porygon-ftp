@@ -6,11 +6,15 @@ from whoosh.fields import Schema, TEXT, ID, NUMERIC
 from whoosh.index import create_in, open_dir
 from whoosh.qparser import QueryParser
 
+def _(string):
+    return unicode(string, "utf-8")
+
 class FTP_Indexer(ftplib.FTP):
     def __init__(self, index, address, user, passwd):
         ftplib.FTP.__init__(self, address, timeout=5)
         self.login(user=user, passwd=passwd)
         self.index = index
+        self.host = address
 
     def scan(self):
         self.index.start()
@@ -30,7 +34,7 @@ class FTP_Indexer(ftplib.FTP):
                 self.sendcmd("TYPE i")
                 size = self.size(dir)
                 print(path, dir, size)
-                self.index.add(filename, path, size // 1024)
+                self.index.add(self.host, filename, path, str(size // 1024))
             finally:
                 self.cwd(path)
 
@@ -40,6 +44,7 @@ class Index(object):
             os.mkdir(indexdir)
         if os.listdir(indexdir) == []:
             schema = Schema(filename=TEXT(stored=True),
+                                          host=TEXT(stored=True),
                                           path=ID(stored=True),
                                           size=NUMERIC(stored=True))
             self.db = create_in('index', schema)
@@ -57,13 +62,14 @@ class Index(object):
             parser = QueryParser('filename', self.db.schema)
             query = parser.parse(txt)
             results = searcher.search(query)
-            return([{'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
+            return([{'host': hit['host'], 'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
 
-    def add(self, filename, dir, size):
-        self.writer.add_document(filename=unicode(filename), path=unicode(dir), size=unicode(size))
+    def add(self, host, filename, dir, size):
+        self.writer.add_document(host=_(host), filename=_(filename), path=_(dir), size=_(size))
 
 if __name__ == '__main__':
     index = Index('index')
-    ftp = FTP_Indexer(index, 'localhost', 'rez', '35zero')
+    #ftp = FTP_Indexer(index, 'localhost', 'rez', '35zero')
+    ftp = FTP_Indexer(index, 'mario.rez', 'rez', 'rez')
     ftp.scan()
     print(index.search(u'*pokemon*'))
