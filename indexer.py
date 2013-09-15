@@ -61,7 +61,7 @@ class Index(object):
         with self.db.searcher() as searcher:
             parser = QueryParser('filename', self.db.schema)
             query = parser.parse(txt)
-            results = searcher.search(query)
+            results = searcher.search(query, limit=None)
             return([{'host': hit['host'], 'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
 
     def add(self, host, filename, dir, size):
