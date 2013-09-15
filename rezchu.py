@@ -16,11 +16,12 @@ def sizeof_fmt(num):
 def search():
     if request.method == 'POST':
         index = Index('index')
-        hits = index.search(' '.join(['*%s*' % word for word in request.form['query'].split()]))
+        query = request.form['query']
+        hits = index.search(' '.join(['*%s*' % word for word in query.split()]))
         for hit in hits:
             hit['size'] = sizeof_fmt(int(hit['size']) * 1024)
             hit['url'] = 'ftp://rez:rez@%s%s' % (hit['host'], os.path.join(hit['path'], hit['filename']))
-        return render_template('search.html', hits=hits, hit_page=True)
+        return render_template('search.html', hits=hits, hit_page=True, query=query)
     else:
         return render_template('search.html')
 

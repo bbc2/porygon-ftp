@@ -15,7 +15,7 @@
         {% if hit_page %}
         <tr>
           <td>
-          <input type="text" name="query" />
+            <input type="text" name="query" {% if query %}value="{{ query }}"{% endif %} />
           </td>
           <td>
           <input type="submit" value="Go" class="hit_page" />
