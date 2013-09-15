@@ -2,13 +2,15 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Rezchu</title>
+  <title>Porygon Search</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon_16.png') }}" />
 </head>
 <body>
   <div id="all" {% if hit_page %}class="hit_page"{% endif %}>
     <header>
-      rezchu
+    <div id="logo">
+    </div>
     </header>
     <form action="." method="post">
       <table>
@@ -18,7 +20,7 @@
             <input type="text" name="query" {% if query %}value="{{ query }}"{% endif %} />
           </td>
           <td>
-            <input type="submit" value="Go" class="hit_page" />
+            <input type="submit" value="Go !" class="hit_page" />
           </td>
           </p>
         </tr>
@@ -30,19 +32,20 @@
         </tr>
         <tr>
           <td>
-            <input type="submit" value="Chu !" />
+            <input type="submit" value="Go !" />
           </td>
           </p>
         </tr>
         {% endif %}
       </table>
     </form>
+    {% if hit_page %}
     {% if hits %}
     <table id="hits">
       {% for hit in hits %}
       <tr>
         <td class="host">{{ hit.host }}</td>
-        <td class="path">{{ hit.path }}</td>
+        <td class="path"><a href="{{ hit.dir_url }}">{{ hit.path }}</a></td>
         <td class="filename"><a href="{{ hit.url }}">{{ hit.filename }}</a></td>
         <td class="size">{{ hit.size }}</td>
       </tr>
@@ -53,8 +56,9 @@
       Pas de résultat
     </p>
     {% endif %}
+    {% endif %}
     <footer>
-      bbc
+      Suggestion ou bug&nbsp;: <a href="mailto:bertrandbc@gmail.com">bertrandbc@gmail.com</a>
     </footer>
   </div>
 </body>

@@ -6,7 +6,7 @@ from indexer import Index
 app = Flask(__name__)
 
 def sizeof_fmt(num):
-    for x in ['o','K','M','G']:
+    for x in ['o','k','M','G']:
         if num < 1024.0:
             return u'%3.1f\xa0%s' % (num, x)
         num /= 1024.0
@@ -21,6 +21,7 @@ def search():
         for hit in hits:
             hit['size'] = sizeof_fmt(int(hit['size']) * 1024)
             hit['url'] = 'ftp://rez:rez@%s%s' % (hit['host'], os.path.join(hit['path'], hit['filename']))
+            hit['dir_url'] = 'ftp://rez:rez@%s%s' % (hit['host'], os.path.join(hit['path']))
         return render_template('search.html', hits=hits, hit_page=True, query=query)
     else:
         return render_template('search.html')
