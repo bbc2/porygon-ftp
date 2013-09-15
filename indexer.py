@@ -57,7 +57,7 @@ class Index(object):
             parser = QueryParser('filename', self.db.schema)
             query = parser.parse(txt)
             results = searcher.search(query)
-            print(results[:])
+            return([{'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
 
     def add(self, filename, dir, size):
         self.writer.add_document(filename=unicode(filename), path=unicode(dir), size=unicode(size))
@@ -66,4 +66,4 @@ if __name__ == '__main__':
     index = Index('index')
     ftp = FTP_Indexer(index, 'localhost', 'rez', '35zero')
     ftp.scan()
-    index.search(u'*pokemon*')
+    print(index.search(u'*pokemon*'))

@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+<title>Rezchu</title>
+</head>
+<body>
+  <form action="." method="post">
+    <p>
+    <input type="text" name="query" />
+    </p>
+    <p>
+    <input type="submit" value="Chu !" />
+    </p>
+  </form>
+  {% if hits %}
+  <p>
+    Resultats
+    <ul>
+      {% for hit in hits %}
+      <li>
+      {{ hit.path }} <strong>{{ hit.filename }}</strong> ({{ hit.size }}&nbsp;ko)
+      </li>
+      {% endfor %}
+    </ul>
+  </p>
+  {% endif %}
+</body>
+</html>
