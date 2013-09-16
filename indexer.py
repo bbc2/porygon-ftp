@@ -5,13 +5,14 @@ import ftplib
 from whoosh.fields import Schema, TEXT, ID, NUMERIC
 from whoosh.index import create_in, open_dir
 from whoosh.qparser import QueryParser
+from ftp_retry import FTP_Retry
 
 def _(string):
     return unicode(string, "utf-8")
 
-class FTP_Indexer(ftplib.FTP):
+class FTP_Indexer(FTP_Retry):
     def __init__(self, index, address, user, passwd):
-        ftplib.FTP.__init__(self, address, timeout=5)
+        FTP_Retry.__init__(self, address, timeout=5)
         self.login(user=user, passwd=passwd)
         self.index = index
         self.host = address
