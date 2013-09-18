@@ -7,6 +7,8 @@ from whoosh.index import create_in, open_dir
 from whoosh.qparser import MultifieldParser
 from ftp_retry import FTP_Retry
 
+HIT_LIMIT = 200
+
 def _(string):
     return unicode(string, "utf-8")
 
@@ -62,7 +64,7 @@ class Index(object):
         with self.db.searcher() as searcher:
             parser = MultifieldParser(['filename', 'path'], self.db.schema)
             query = parser.parse(txt)
-            results = searcher.search(query, limit=None)
+            results = searcher.search(query, limit=HIT_LIMIT)
             return([{'host': hit['host'], 'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
 
     def add(self, host, filename, dir, size):
