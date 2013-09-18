@@ -48,9 +48,9 @@ class Index(object):
                                           host=TEXT(stored=True),
                                           path=ID(stored=True),
                                           size=NUMERIC(stored=True))
-            self.db = create_in('index', schema)
+            self.db = create_in(inderdir, schema)
         else:
-            self.db = open_dir('index')
+            self.db = open_dir(indexdir)
 
     def start(self):
         self.writer = self.db.writer()
