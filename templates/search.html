@@ -9,8 +9,10 @@
 <body>
   <div id="all" {% if hit_page %}class="hit_page"{% endif %}>
     <header>
-    <div id="logo">
-    </div>
+      <a href="{{ url_for('search') }}">
+        <div id="logo">
+        </div>
+      </a>
     </header>
     <form action="." method="post">
       <table>
