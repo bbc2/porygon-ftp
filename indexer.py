@@ -4,7 +4,7 @@ import os
 import ftplib
 from whoosh.fields import Schema, TEXT, ID, NUMERIC
 from whoosh.index import create_in, open_dir
-from whoosh.qparser import QueryParser
+from whoosh.qparser import MultifieldParser
 from ftp_retry import FTP_Retry
 
 def _(string):
@@ -60,7 +60,7 @@ class Index(object):
 
     def search(self, txt):
         with self.db.searcher() as searcher:
-            parser = QueryParser('filename', self.db.schema)
+            parser = MultifieldParser(['filename', 'path'], self.db.schema)
             query = parser.parse(txt)
             results = searcher.search(query, limit=None)
             return([{'host': hit['host'], 'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
