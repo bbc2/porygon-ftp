@@ -10,7 +10,7 @@ from ftp_retry import FTP_Retry
 HIT_LIMIT = 200
 
 def _(string):
-    return unicode(string, "utf-8")
+    return unicode(string, 'utf-8')
 
 class FTP_Indexer(FTP_Retry):
     def __init__(self, index, address, user, passwd):
@@ -34,7 +34,7 @@ class FTP_Indexer(FTP_Retry):
             except ftplib.error_perm:
                 # that's a file
                 filename = dir
-                self.sendcmd("TYPE i")
+                self.sendcmd('TYPE i')
                 size = self.size(dir)
                 print(path, dir, size)
                 self.index.add(self.host, filename, path, str(size // 1024))
