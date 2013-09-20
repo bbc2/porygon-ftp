@@ -19,18 +19,18 @@ class FTP_Indexer(FTP_Retry):
         self.index = index
         self.host = address
 
-    def scan(self):
+    def walk(self):
         self.index.start()
-        self._scan()
+        self._walk()
         self.index.commit()
 
-    def _scan(self):
+    def _walk(self):
         dirs = self.nlst()
         path = self.pwd()
         for dir in dirs:
             try:
                 self.cwd(dir)
-                self._scan()
+                self._walk()
             except ftplib.error_perm:
                 # that's a file
                 filename = dir
@@ -73,5 +73,5 @@ class Index(object):
 if __name__ == '__main__':
     index = Index('index')
     ftp = FTP_Indexer(index, 'localhost', 'rez', '35zero')
-    ftp.scan()
+    ftp.walk()
     print(index.search(u'*pokemon*'))
