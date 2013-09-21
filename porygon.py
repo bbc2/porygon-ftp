@@ -5,6 +5,8 @@ from flask import Flask, render_template, request, url_for
 from indexer import Index
 app = Flask(__name__)
 
+from local_settings import *
+
 def sizeof_fmt(num):
     for x in ['o','k','M','G']:
         if num < 1024.0:
@@ -15,7 +17,7 @@ def sizeof_fmt(num):
 @app.route('/', methods=['POST', 'GET'])
 def search():
     if request.method == 'POST':
-        index = Index('index')
+        index = Index(INDEX_DIR)
         query = request.form['query']
         hits = index.search(' '.join(['*%s*' % word for word in query.split()]))
         for hit in hits:

@@ -50,7 +50,7 @@ class Index(object):
                                           host=TEXT(stored=True),
                                           path=ID(stored=True),
                                           size=NUMERIC(stored=True))
-            self.db = create_in(inderdir, schema)
+            self.db = create_in(indexdir, schema)
         else:
             self.db = open_dir(indexdir)
 
