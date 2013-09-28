@@ -4,6 +4,9 @@
 # Index directory
 INDEX_DIR = '/var/local/porygon/index'
 
+# Maximum number of hits to return in a search
+HIT_LIMIT = 200
+
 # Network to be scanned
 NETWORK = '10.0.0.0/24'
 
