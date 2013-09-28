@@ -71,6 +71,13 @@ class Index(object):
         self.writer.add_document(host=_(host), filename=_(filename), path=_(dir), size=_(size))
 
 if __name__ == '__main__':
+    import sqlite3
+    ftp_db = sqlite3.connect(settings.FTP_DB)
+    cur = ftp_db.cursor()
+    cur.execute('select ip from ftp')
+    ftps = cur.fetchall()
+    ftp_db.close()
     index = Index(settings.INDEX_DIR)
-    ftp_indexer = FTP_Indexer(index, 'localhost', settings.FTP_USER, settings.FTP_PASSWD)
-    ftp_indexer.walk()
+    for ftp in ftps:
+        ftp_indexer = FTP_Indexer(index, ftp[0].encode('utf-8'), settings.FTP_USER, settings.FTP_PASSWD)
+        ftp_indexer.walk()

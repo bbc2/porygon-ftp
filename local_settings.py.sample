@@ -4,6 +4,9 @@
 # Index directory
 INDEX_DIR = '/var/local/porygon/index'
 
+# FTP SQLite database
+FTP_DB = '/var/local/porygon/ftp.db'
+
 # Maximum number of hits to return in a search
 HIT_LIMIT = 200
 
