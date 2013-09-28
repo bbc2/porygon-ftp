@@ -3,3 +3,10 @@
 
 # Index directory
 INDEX_DIR = '/var/local/porygon/index'
+
+# Network to be scanned
+NETWORK = '10.0.0.0/24'
+
+# FTP credentials
+FTP_USER = 'rez'
+FTP_PASSWD = '35zero'
