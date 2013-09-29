@@ -15,7 +15,7 @@ def with_max_retries(max_retries, exceptions_to_catch):
                     return f(*args, **kwargs)
                 except exceptions_to_catch:
                     if retries_left > 0:
-                        repeat(retries_left - 1)
+                        return repeat(retries_left - 1)
                     else:
                         raise TooManyRetries()
             return repeat(max_retries)
