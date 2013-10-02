@@ -36,7 +36,6 @@
           <td>
             <input type="submit" value="Go !" />
           </td>
-          </p>
         </tr>
         {% endif %}
       </table>
@@ -58,6 +57,23 @@
       Pas de résultat
     </p>
     {% endif %}
+    {% else %}
+    <div id="ftp_list">
+      <div class="box_title">
+        Serveurs en ligne
+      </div>
+      <div class="box_content">
+        <ul>
+          {% if ftps %}
+          {% for ftp in ftps %}
+          <li><a href="{{ ftp.url }}">{{ ftp.host }}</a></li>
+          {% endfor %}
+          {% else %}
+          aucun
+          {% endif %}
+        </ul>
+      </div>
+    </div>
     {% endif %}
     <footer>
       Suggestion ou bug&nbsp;: <a href="mailto:bertrandbc@gmail.com">bertrandbc@gmail.com</a>

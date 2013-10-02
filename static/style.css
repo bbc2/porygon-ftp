@@ -57,6 +57,34 @@ a {
     color: #46C;
 }
 
+div#ftp_list {
+    max-width: 10em;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+div.box_title {
+    font-size: .9em;
+    font-weight: bold;
+    background: #AEE;
+    border-radius: .7em .7em 0em 0em;
+    padding: .22em 0em;
+}
+
+div.box_content {
+    border: solid .1em #AEE;
+    border-radius: 0em 0em .7em .7em;
+    box-shadow: 0em .1em .3em rgba(0, 0, 0, 0.2) inset
+}
+
+ul {
+    list-style-type: none;
+    text-align: center;
+    padding: 0em;
+    margin: .5em .5em;
+}
+
 a:hover {
     color: #008;
     text-decoration: underline;
@@ -69,8 +97,6 @@ table {
 }
 
 #hits {
-    #background: #DEF;
-    #border-radius: 1em;
     padding: 1em;
 }
 
@@ -137,6 +163,7 @@ input[type="submit"] {
     border-radius: .5em;
     margin-right: .7em;
     min-width: 6em;
+    margin-bottom: 1.2em;
 }
 
 input[type="submit"]:hover {
@@ -150,6 +177,7 @@ input[type="submit"].hit_page {
     height: 2.7em;
     padding: 0 .7em;
     min-width: 0px;
+    margin-bottom: 0em;
 }
 
 input:focus {
