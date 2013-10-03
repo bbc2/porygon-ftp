@@ -3,6 +3,7 @@
 import os
 import ftplib
 from datetime import datetime
+from whoosh.query import DateRange
 from whoosh.fields import Schema, TEXT, ID, NUMERIC, DATETIME
 from whoosh.index import create_in, open_dir
 from whoosh.qparser import MultifieldParser
@@ -21,8 +22,10 @@ class FTP_Indexer(FTP_Retry):
         self.host = address
 
     def walk(self):
+        start_time = datetime.utcnow()
         self.index.start()
         self._walk()
+        self.index.purge(start_time)
         self.index.commit()
 
     def _walk(self):
@@ -77,6 +80,10 @@ class Index(object):
                                     filename=_(filename),
                                     path=_(dir),
                                     size=_(size))
+
+    def purge(self, before):
+        deleted_files = DateRange('last_updated', None, before)
+        self.writer.delete_by_query(deleted_files)
 
 if __name__ == '__main__':
     import sqlite3
