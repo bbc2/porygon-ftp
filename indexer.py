@@ -2,7 +2,8 @@
 
 import os
 import ftplib
-from whoosh.fields import Schema, TEXT, ID, NUMERIC
+from datetime import datetime
+from whoosh.fields import Schema, TEXT, ID, NUMERIC, DATETIME
 from whoosh.index import create_in, open_dir
 from whoosh.qparser import MultifieldParser
 from ftp_retry import FTP_Retry
@@ -70,7 +71,12 @@ class Index(object):
             return([{'host': hit['host'], 'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
 
     def add(self, host, filename, dir, size):
-        self.writer.add_document(host=_(host), filename=_(filename), path=_(dir), size=_(size))
+        self.writer.update_document(fullpath=_(os.path.join(dir, filename)),
+                                    last_updated=datetime.utcnow(),
+                                    host=_(host),
+                                    filename=_(filename),
+                                    path=_(dir),
+                                    size=_(size))
 
 if __name__ == '__main__':
     import sqlite3
