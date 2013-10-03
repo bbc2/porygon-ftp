@@ -42,10 +42,10 @@ class FTP_Indexer(FTP_Retry):
                 self.cwd(path)
 
 class Index(object):
-    def __init__(self, indexdir):
+    def __init__(self, indexdir, erase=False):
         if not os.path.isdir(indexdir):
             os.mkdir(indexdir)
-        if os.listdir(indexdir) == []:
+        if erase or os.listdir(indexdir) == []:
             schema = Schema(fullpath=ID(unique=True),
                             last_updated=DATETIME(),
                             filename=TEXT(stored=True),
