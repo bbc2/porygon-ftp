@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from datetime import datetime
 from ftplib import FTP
 import socket
 import parallel
@@ -17,7 +18,7 @@ class FTP_Scanner(object):
         scan = scanner._scan(network)
         for result in scan:
             if result[1]:
-                yield (result[0],)
+                yield (result[0], datetime.utcnow())
 
     def _scan(self, network):
         self.cur_network = IPv4Network(unicode(network, 'utf-8')).hosts()
@@ -38,9 +39,11 @@ class FTP_Scanner(object):
 
 if __name__ == '__main__':
     import sqlite3
+    start_time = datetime.utcnow()
     ftp_db = sqlite3.connect(settings.FTP_DB)
-    ftp_db.execute('create table if not exists ftp (ip text)')
+    ftp_db.execute('create table if not exists ftp (ip text, last_updated date)')
     scanner = FTP_Scanner(settings.FTP_USER, settings.FTP_PASSWD)
     ftp_iter = scanner.ftp_iter(settings.NETWORK)
     with ftp_db:
-        ftp_db.executemany('insert into ftp values (?)', ftp_iter)
+        ftp_db.executemany('insert or replace into ftp values (?, ?)', ftp_iter)
+        ftp_db.execute('delete from ftp where last_updated < ?', (start_time,))
