@@ -28,7 +28,7 @@ def search():
     if request.method == 'POST':
         index = Index(settings.INDEX_DIR)
         query = request.form['query']
-        hits = index.search(' '.join(['*%s*' % word for word in query.split()]))
+        hits = index.search(query)
         for hit in hits:
             hit['size'] = sizeof_fmt(int(hit['size']) * 1024)
             hit['url'] = 'ftp://rez:rez@%s%s' % (hit['host'], os.path.join(hit['path'], hit['filename']))
