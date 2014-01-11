@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import ftplib
@@ -11,9 +11,6 @@ from whoosh.qparser import MultifieldParser
 from ftp_retry import FTP_Retry
 
 import settings
-
-def _(string):
-    return unicode(string, 'utf-8')
 
 class FTP_Indexer(FTP_Retry):
     def __init__(self, index, address, user, passwd):
@@ -42,7 +39,7 @@ class FTP_Indexer(FTP_Retry):
                 self.sendcmd('TYPE i')
                 size = self.size(dir)
                 print(path, dir, size)
-                self.index.add(self.host, filename, path, str(size // 1024))
+                self.index.add(self.host.decode(), filename, path, size // 1024)
             finally:
                 self.cwd(path)
 
@@ -75,12 +72,12 @@ class Index(object):
             return([{'host': hit['host'], 'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
 
     def add(self, host, filename, dir, size):
-        self.writer.update_document(fullpath=_(os.path.join(dir, filename)),
+        self.writer.update_document(fullpath=os.path.join(dir, filename),
                                     last_updated=datetime.utcnow(),
-                                    host=_(host),
-                                    filename=_(filename),
-                                    path=_(dir),
-                                    size=_(size))
+                                    host=host,
+                                    filename=filename,
+                                    path=dir,
+                                    size=size)
 
     def purge(self, before):
         deleted_files = DateRange('last_updated', None, before)

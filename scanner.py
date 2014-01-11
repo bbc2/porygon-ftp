@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from datetime import datetime
 from ftplib import FTP
@@ -21,7 +21,7 @@ class FTP_Scanner(object):
                 yield (result[0], datetime.utcnow())
 
     def _scan(self, network):
-        self.cur_network = IPv4Network(unicode(network, 'utf-8')).hosts()
+        self.cur_network = IPv4Network(network).hosts()
         self.scan.start()
         return self.scan.results()
 
