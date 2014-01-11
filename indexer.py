@@ -12,12 +12,13 @@ from ftp_retry import FTP_Retry
 
 import settings
 
-class FTP_Indexer(FTP_Retry):
-    def __init__(self, index, address, user, passwd):
-        FTP_Retry.__init__(self, address, timeout=5)
-        self.login(user=user, passwd=passwd)
+class FTP_Indexer(object):
+    def __init__(self, index, host, user, passwd):
         self.index = index
-        self.host = address
+        self.host = host
+        self.user = user
+        self.passwd = passwd
+        self._new_ftp()
 
     def walk(self):
         start_time = datetime.utcnow()
@@ -27,21 +28,32 @@ class FTP_Indexer(FTP_Retry):
         self.index.commit()
 
     def _walk(self):
-        dirs = self.nlst()
-        path = self.pwd()
+        dirs = self.ftp.nlst()
+        path = self.ftp.pwd()
         for dir in dirs:
             try:
-                self.cwd(dir)
+                self.ftp.cwd(dir)
                 self._walk()
             except ftplib.error_perm:
                 # that's a file
                 filename = dir
-                self.sendcmd('TYPE i')
-                size = self.size(dir)
-                print(path, dir, size)
-                self.index.add(self.host.decode(), filename, path, size // 1024)
+                self.ftp.sendcmd('TYPE i')
+                size = self.ftp.size(dir)
+                print("{}/{} ({})".format(path.encode('latin-1'), dir.encode('latin-1'), size))
+                self.index.add(self.host.decode('utf-8'), filename, path, size // 1024)
+            except OSError:
+                self._new_ftp()
+            except ftplib.all_errors:
+                self.ftp.quit()
+                self._new_ftp()
             finally:
-                self.cwd(path)
+                self.ftp.cwd(path)
+
+    def _new_ftp(self):
+        print('Connecting to {}'.format(self.host))
+        self.ftp = FTP_Retry(self.host, timeout=5)
+        print('Logging in as {}:{}'.format(self.user, self.passwd))
+        self.ftp.login(self.user, self.passwd)
 
 class Index(object):
     def __init__(self, indexdir, erase=False):
