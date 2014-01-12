@@ -5,7 +5,8 @@ import ftplib
 from datetime import datetime
 from whoosh.query import DateRange
 from whoosh.fields import Schema, TEXT, ID, NUMERIC, DATETIME
-from whoosh.analysis import FancyAnalyzer
+from whoosh.analysis import FancyAnalyzer, CharsetFilter
+from whoosh.support.charset import accent_map
 from whoosh.index import create_in, open_dir
 from whoosh.qparser import MultifieldParser
 from ftp_retry import FTP_Retry
@@ -63,11 +64,12 @@ class Index(object):
         if not os.path.isdir(indexdir):
             os.mkdir(indexdir)
         if erase or os.listdir(indexdir) == []:
+            analyzer = FancyAnalyzer() | CharsetFilter(accent_map)
             schema = Schema(fullpath=ID(unique=True),
                             last_updated=DATETIME(),
-                            filename=TEXT(stored=True, analyzer=FancyAnalyzer()),
+                            filename=TEXT(stored=True, analyzer=analyzer),
                             host=TEXT(stored=True),
-                            path=TEXT(stored=True, analyzer=FancyAnalyzer()),
+                            path=TEXT(stored=True, analyzer=analyzer),
                             size=NUMERIC(stored=True))
             self.db = create_in(indexdir, schema)
         else:
