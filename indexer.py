@@ -102,7 +102,7 @@ if __name__ == '__main__':
     import sqlite3
     ftp_db = sqlite3.connect(settings.FTP_DB)
     cur = ftp_db.cursor()
-    cur.execute('select ip from ftp')
+    cur.execute('select host from ftp')
     ftps = cur.fetchall()
     ftp_db.close()
     index = Index(settings.INDEX_DIR)

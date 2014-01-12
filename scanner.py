@@ -8,6 +8,12 @@ from ipaddress import IPv4Network, ip_network, collapse_addresses
 
 import settings
 
+def reverse_ip(ip):
+    try:
+        return socket.gethostbyaddr(ip)[0]
+    except socket.herror:
+        return ip
+
 class FTP_Scanner(object):
     def __init__(self, login, passwd):
         self.login = login
@@ -18,7 +24,7 @@ class FTP_Scanner(object):
         scan = scanner._scan(network)
         for result in scan:
             if result[1]:
-                yield (result[0], datetime.utcnow())
+                yield (reverse_ip(result[0]), datetime.utcnow())
 
     def _scan(self, network):
         self.cur_network = IPv4Network(network).hosts()
@@ -41,7 +47,7 @@ if __name__ == '__main__':
     import sqlite3
     start_time = datetime.utcnow()
     ftp_db = sqlite3.connect(settings.FTP_DB)
-    ftp_db.execute('create table if not exists ftp (ip text, last_updated date)')
+    ftp_db.execute('create table if not exists ftp (host text, last_updated date)')
     scanner = FTP_Scanner(settings.FTP_USER, settings.FTP_PASSWD)
     ftp_iter = scanner.ftp_iter(settings.NETWORK)
     with ftp_db:

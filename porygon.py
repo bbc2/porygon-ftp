@@ -19,7 +19,7 @@ def get_ftp(ftp_db):
     import sqlite3
     ftp_db = sqlite3.connect(ftp_db)
     cur = ftp_db.cursor()
-    cur.execute('select ip from ftp')
+    cur.execute('select host from ftp')
     ftps = cur.fetchall()
     ftp_db.close()
     return [{ 'host': ftp[0], 'url': 'ftp://rez:rez@%s' % ftp[0] } for ftp in ftps]
