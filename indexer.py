@@ -32,19 +32,23 @@ class FTP_Indexer(object):
         self.index.commit()
 
     def _walk(self, path=None):
-        if path == None:
-            path = self.ftp.pwd()
-        files = self.ftp.mlsd(facts=['type', 'size'])
-        for (filename, attrs) in files:
-            if filename[0] == '.':
-                continue
-            print('{}/{} {}'.format(_(path), _(filename), attrs))
-            if attrs['type'] == 'dir':
-                self.ftp.cwd(filename)
-                self._walk(os.path.join(path, filename))
-                self.ftp.cwd(path)
-            elif attrs['type'] == 'file':
-                self.index.add(self.host.decode(), _(filename), _(path), int(attrs['size']) // 1024)
+        try:
+            if path == None:
+                path = self.ftp.pwd()
+            files = self.ftp.mlsd(facts=['type', 'size'])
+            for (filename, attrs) in files:
+                if filename[0] == '.':
+                    continue
+                print('{}/{} {}'.format(_(path), _(filename), attrs))
+                if attrs['type'] == 'dir':
+                    self.ftp.cwd(filename)
+                    self._walk(os.path.join(path, filename))
+                    self.ftp.cwd(path)
+                elif attrs['type'] == 'file':
+                    self.index.add(self.host.decode(), _(filename), _(path), int(attrs['size']) // 1024)
+        except (OSError, ftplib.error_reply): # timeout or desynchronization
+            self._new_ftp()
+            self.ftp.cwd(path)
 
     def _new_ftp(self):
         print('Connecting to {}'.format(self.host))
