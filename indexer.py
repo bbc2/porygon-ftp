@@ -87,12 +87,12 @@ class Index(object):
             return([{'host': hit['host'], 'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
 
     def add(self, host, filename, dir, size):
-        self.writer.update_document(fullpath=os.path.join(dir, filename),
-                                    last_updated=datetime.utcnow(),
-                                    host=host,
-                                    filename=filename,
-                                    path=dir,
-                                    size=size)
+        self.writer.add_document(fullpath=os.path.join(dir, filename),
+                                 last_updated=datetime.utcnow(),
+                                 host=host,
+                                 filename=filename,
+                                 path=dir,
+                                 size=size)
 
     def purge(self, before):
         deleted_files = DateRange('last_updated', None, before)
