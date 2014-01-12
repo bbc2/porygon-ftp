@@ -7,12 +7,13 @@ app = Flask(__name__)
 
 import settings
 
-def sizeof_fmt(num):
+def sizeof_format(num):
+    format_str = '{:.1f}\xa0{}'
     for x in ['o','k','M','G']:
         if num < 1024.0:
-            return u'%3.1f\xa0%s' % (num, x)
+            return format_str.format(num, x)
         num /= 1024.0
-    return u'%3.1f\xa0%s' % (num, 'T')
+    return format_str.format(num, 'T')
 
 def get_ftp(ftp_db):
     import sqlite3
@@ -30,7 +31,7 @@ def search():
         query = request.form['query']
         hits = index.search(query)
         for hit in hits:
-            hit['size'] = sizeof_fmt(int(hit['size']) * 1024)
+            hit['size'] = sizeof_format(int(hit['size']) * 1024)
             hit['url'] = 'ftp://rez:rez@%s%s' % (hit['host'], os.path.join(hit['path'], hit['filename']))
             hit['dir_url'] = 'ftp://rez:rez@%s%s' % (hit['host'], os.path.join(hit['path']))
 
