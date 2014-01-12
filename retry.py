@@ -10,15 +10,13 @@ def with_max_retries(max_retries, exceptions_to_catch):
     """
     def decorator(f):
         def decorated(*args, **kwargs):
-            def repeat(retries_left):
+            tries_left = max_retries + 1
+            while tries_left > 0:
                 try:
                     return f(*args, **kwargs)
                 except exceptions_to_catch:
-                    if retries_left > 0:
-                        return repeat(retries_left - 1)
-                    else:
-                        raise TooManyRetries()
-            return repeat(max_retries)
+                    tries_left -= 1
+            raise TooManyRetries()
         return decorated
     return decorator
 
