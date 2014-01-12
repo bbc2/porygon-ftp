@@ -13,6 +13,9 @@ from ftp_retry import FTP_Retry
 
 import settings
 
+def _(string):
+    return string.encode('latin-1').decode('utf-8')
+
 class FTP_Indexer(object):
     def __init__(self, index, host, user, passwd):
         self.index = index
@@ -28,30 +31,20 @@ class FTP_Indexer(object):
         self.index.purge(start_time)
         self.index.commit()
 
-    def _walk(self):
-        dirs = self.ftp.nlst()
-        path = self.ftp.pwd()
-        for dir in dirs:
-            try:
-                self.ftp.cwd(dir)
-                self._walk()
-            except ftplib.error_perm:
-                # that's a file
-                filename = dir
-                self.ftp.sendcmd('TYPE i')
-                size = self.ftp.size(dir)
-                print("{}/{} ({})".format(path.encode('latin-1'), dir.encode('latin-1'), size))
-                self.index.add(self.host.decode('utf-8'),
-                               filename.encode('latin-1').decode('utf-8'),
-                               path.encode('latin-1').decode('utf-8'),
-                               size // 1024)
-            except OSError:
-                self._new_ftp()
-            except ftplib.all_errors:
-                self.ftp.quit()
-                self._new_ftp()
-            finally:
+    def _walk(self, path=None):
+        if path == None:
+            path = self.ftp.pwd()
+        files = self.ftp.mlsd(facts=['type', 'size'])
+        for (filename, attrs) in files:
+            if filename[0] == '.':
+                continue
+            print('{}/{} {}'.format(_(path), _(filename), attrs))
+            if attrs['type'] == 'dir':
+                self.ftp.cwd(filename)
+                self._walk(os.path.join(path, filename))
                 self.ftp.cwd(path)
+            elif attrs['type'] == 'file':
+                self.index.add(self.host.decode(), _(filename), _(path), int(attrs['size']) // 1024)
 
     def _new_ftp(self):
         print('Connecting to {}'.format(self.host))
