@@ -70,7 +70,7 @@ class Index(object):
                             filename=TEXT(stored=True, analyzer=analyzer),
                             host=TEXT(stored=True),
                             path=TEXT(stored=True, analyzer=analyzer),
-                            size=NUMERIC(stored=True))
+                            size=NUMERIC(stored=True, sortable=True))
             self.db = create_in(indexdir, schema)
         else:
             self.db = open_dir(indexdir)
@@ -85,7 +85,8 @@ class Index(object):
         with self.db.searcher() as searcher:
             parser = MultifieldParser(['filename', 'path'], self.db.schema)
             query = parser.parse(txt)
-            results = searcher.search(query, limit=settings.HIT_LIMIT)
+            results = searcher.search(query, limit=settings.HIT_LIMIT,
+                                      sortedby="size", reverse=True)
             return([{'host': hit['host'], 'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
 
     def add(self, host, filename, dir, size):
