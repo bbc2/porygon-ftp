@@ -86,12 +86,12 @@ class Index(object):
                                       sortedby="size", reverse=True)
             return([{'host': hit['host'], 'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
 
-    def add(self, host, filename, dir, size):
-        self.writer.add_document(fullpath=os.path.join(dir, filename),
+    def add(self, host, filename, path, size):
+        self.writer.add_document(fullpath=os.path.join(path, filename),
                                  last_updated=datetime.utcnow(),
                                  host=host,
                                  filename=filename,
-                                 path=dir,
+                                 path=path,
                                  size=size)
 
     def purge(self, before):
