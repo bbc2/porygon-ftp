@@ -40,7 +40,10 @@ class FTP_Indexer(object):
                 self.ftp.sendcmd('TYPE i')
                 size = self.ftp.size(dir)
                 print("{}/{} ({})".format(path.encode('latin-1'), dir.encode('latin-1'), size))
-                self.index.add(self.host.decode('utf-8'), filename, path, size // 1024)
+                self.index.add(self.host.decode('utf-8'),
+                               filename.encode('latin-1').decode('utf-8'),
+                               path.encode('latin-1').decode('utf-8'),
+                               size // 1024)
             except OSError:
                 self._new_ftp()
             except ftplib.all_errors:
