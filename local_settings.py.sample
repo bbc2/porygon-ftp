@@ -13,6 +13,9 @@ HIT_LIMIT = 200
 # Network to be scanned
 NETWORK = '10.0.0.0/24'
 
+# Timeout for FTP connections
+FTP_TIMEOUT = 30
+
 # FTP credentials
 FTP_USER = 'rez'
 FTP_PASSWD = '35zero'

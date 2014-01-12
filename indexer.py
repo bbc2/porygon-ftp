@@ -52,7 +52,7 @@ class FTP_Indexer(object):
 
     def _new_ftp(self):
         print('Connecting to {}'.format(self.host))
-        self.ftp = FTP_Retry(self.host, timeout=5)
+        self.ftp = FTP_Retry(self.host, timeout=settings.FTP_TIMEOUT)
         print('Logging in as {}:{}'.format(self.user, self.passwd))
         self.ftp.login(self.user, self.passwd)
 
