@@ -1,2 +1,2 @@
-Flask==0.8
-Whoosh==2.3.2
+Flask==0.10.1
+Whoosh==2.5.6
