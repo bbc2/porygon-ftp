@@ -3,7 +3,7 @@
 import os
 import ftplib
 from datetime import datetime
-from whoosh.query import DateRange
+from whoosh.query import DateRange, Term
 from whoosh.fields import Schema, TEXT, ID, NUMERIC, DATETIME
 from whoosh.analysis import FancyAnalyzer, CharsetFilter
 from whoosh.support.charset import accent_map
@@ -28,7 +28,7 @@ class FTP_Indexer(object):
         start_time = datetime.utcnow()
         self.index.start()
         self._walk()
-        self.index.purge(start_time)
+        self.index.purge(Term('host', self.host) & DateRange('last_updated', None, start_time))
         self.index.commit()
 
     def _walk(self, path=None):
@@ -94,9 +94,8 @@ class Index(object):
                                  path=path,
                                  size=size)
 
-    def purge(self, before):
-        deleted_files = DateRange('last_updated', None, before)
-        self.writer.delete_by_query(deleted_files)
+    def purge(self, query):
+        self.writer.delete_by_query(query)
 
 if __name__ == '__main__':
     import sqlite3
