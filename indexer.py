@@ -39,7 +39,7 @@ class FTP_Indexer(object):
             for (filename, attrs) in files:
                 if filename[0] == '.':
                     continue
-                print('{}/{} {}'.format(_(path), _(filename), attrs))
+                print('{} {}'.format(os.path.join(_(path), _(filename)), attrs))
                 if attrs['type'] == 'dir':
                     self.ftp.cwd(filename)
                     self._walk(os.path.join(path, filename))
