@@ -39,13 +39,13 @@ class FTP_Indexer(object):
             for (filename, attrs) in files:
                 if filename[0] == '.':
                     continue
-                print('{} {}'.format(os.path.join(_(path), _(filename)), attrs))
+                print('{}:{} {}'.format(self.host, os.path.join(_(path), _(filename)), attrs))
                 if attrs['type'] == 'dir':
                     self.ftp.cwd(filename)
                     self._walk(os.path.join(path, filename))
                     self.ftp.cwd(path)
                 elif attrs['type'] == 'file':
-                    self.index.add(self.host.decode(), _(filename), _(path), int(attrs['size']) // 1024)
+                    self.index.add(self.host, _(filename), _(path), int(attrs['size']) // 1024)
         except (OSError, ftplib.error_reply): # timeout or desynchronization
             self._new_ftp()
             self.ftp.cwd(path)
@@ -106,5 +106,5 @@ if __name__ == '__main__':
     ftp_db.close()
     index = Index(settings.INDEX_DIR)
     for ftp in ftps:
-        ftp_indexer = FTP_Indexer(index, ftp[0].encode('utf-8'), settings.FTP_USER, settings.FTP_PASSWD)
+        ftp_indexer = FTP_Indexer(index, ftp[0], settings.FTP_USER, settings.FTP_PASSWD)
         ftp_indexer.walk()
