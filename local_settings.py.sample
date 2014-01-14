@@ -7,14 +7,8 @@ INDEX_DIR = '/var/local/porygon/index'
 # FTP SQLite database
 FTP_DB = '/var/local/porygon/ftp.db'
 
-# Maximum number of hits to return in a search
-HIT_LIMIT = 200
-
 # Network to be scanned
 NETWORK = '10.0.0.0/24'
-
-# Timeout for FTP connections
-FTP_TIMEOUT = 30
 
 # FTP credentials
 FTP_USER = 'rez'

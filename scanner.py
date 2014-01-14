@@ -31,7 +31,7 @@ class FTP_Scanner(object):
         self.scan.start()
         return self.scan.results()
 
-    def _has_ftp(self, ip, timeout=settings.FTP_TIMEOUT):
+    def _has_ftp(self, ip, timeout=settings.FTP_SCAN_TIMEOUT):
         try:
             ftp = FTP(ip, timeout=timeout)
             ftp.login(self.login, self.passwd)
