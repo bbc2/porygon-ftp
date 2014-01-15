@@ -18,7 +18,7 @@ class FTP_Scanner(object):
     def __init__(self, login, passwd):
         self.login = login
         self.passwd = passwd
-        self.scan = parallel.Parallel(self._has_ftp, self._targets, process_count=20)
+        self.scan = parallel.Parallel(self._has_ftp, self._targets, process_count=settings.FTP_SCAN_PROCESS_COUNT)
 
     def ftp_iter(self, network):
         scan = scanner._scan(network)

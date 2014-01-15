@@ -1,3 +1,6 @@
+# Number of parallel scanner processes
+FTP_SCAN_PROCESS_COUNT = 20
+
 # Scanner timeout for FTP connections (seconds)
 FTP_SCAN_TIMEOUT = 5
 
