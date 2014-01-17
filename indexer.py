@@ -76,7 +76,7 @@ class Index(object):
         self.writer = self.db.writer()
 
     def commit(self):
-        self.writer.commit()
+        self.writer.commit(optimize=True)
 
     def search(self, txt):
         with self.db.searcher() as searcher:
