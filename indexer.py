@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import ftplib
+import traceback
 from datetime import datetime
 from whoosh.query import DateRange, Term
 from whoosh.fields import Schema, TEXT, ID, NUMERIC, DATETIME
@@ -16,6 +18,9 @@ import settings
 def _(string):
     return string.encode('latin-1').decode('utf-8')
 
+class MLSD_NotSupported(Exception):
+    pass
+
 class FTP_Indexer(object):
     def __init__(self, index, host, user, passwd):
         self.index = index
@@ -27,7 +32,13 @@ class FTP_Indexer(object):
     def walk(self):
         start_time = datetime.utcnow()
         self.index.start()
-        self._walk()
+
+        try:
+            self._walk()
+        except Exception as exn:
+            self.index.cancel()
+            raise exn
+
         self.index.purge(Term('host', self.host) & DateRange('last_updated', None, start_time))
         self.index.commit()
 
@@ -35,7 +46,12 @@ class FTP_Indexer(object):
         try:
             if path == None:
                 path = self.ftp.pwd()
-            files = self.ftp.mlsd(facts=['type', 'size'])
+
+            try:
+                files = self.ftp.mlsd(facts=['type', 'size'])
+            except ftplib.error_perm:
+                raise MLSD_NotSupported
+
             for (filename, attrs) in files:
                 if filename[0] == '.':
                     continue
@@ -78,6 +94,9 @@ class Index(object):
     def commit(self):
         self.writer.commit(optimize=True)
 
+    def cancel(self):
+        self.writer.cancel()
+
     def search(self, txt):
         with self.db.searcher() as searcher:
             parser = MultifieldParser(['filename', 'path'], self.db.schema)
@@ -106,5 +125,10 @@ if __name__ == '__main__':
     ftp_db.close()
     index = Index(settings.INDEX_DIR)
     for ftp in ftps:
-        ftp_indexer = FTP_Indexer(index, ftp[0], settings.FTP_USER, settings.FTP_PASSWD)
-        ftp_indexer.walk()
+        try:
+            ftp_indexer = FTP_Indexer(index, ftp[0], settings.FTP_USER, settings.FTP_PASSWD)
+            ftp_indexer.walk()
+        except MLSD_NotSupported:
+            print('Error: FTP MLSD not supported on {}'.format(ftp[0]), file=sys.stderr)
+        except:
+            print(traceback.format_exc(), file=sys.stderr)
