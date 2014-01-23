@@ -4,6 +4,8 @@ import os
 import sys
 import ftplib
 import traceback
+import logging
+import logging.config
 from datetime import datetime
 from whoosh.query import DateRange, Term
 from whoosh.fields import Schema, TEXT, ID, NUMERIC, DATETIME
@@ -14,6 +16,9 @@ from whoosh.qparser import MultifieldParser
 from ftp_retry import FTP_Retry
 
 import settings
+
+logging.config.dictConfig(settings.LOGGING)
+logger = logging.getLogger()
 
 def _(string):
     return string.encode('latin-1').decode('utf-8')
@@ -27,6 +32,7 @@ class FTP_Indexer(object):
         self.host = host
         self.user = user
         self.passwd = passwd
+        self.logger = logging.getLogger(format(host))
         self._new_ftp()
 
     def walk(self):
@@ -55,7 +61,7 @@ class FTP_Indexer(object):
             for (filename, attrs) in files:
                 if filename[0] == '.':
                     continue
-                print('{}:{} {}'.format(self.host, os.path.join(_(path), _(filename)), attrs))
+                self.logger.debug('{} {}'.format(os.path.join(_(path), _(filename)), attrs))
                 if attrs['type'] == 'dir':
                     self.ftp.cwd(filename)
                     self._walk(os.path.join(path, filename))
@@ -67,9 +73,9 @@ class FTP_Indexer(object):
             self.ftp.cwd(path)
 
     def _new_ftp(self):
-        print('Connecting to {}'.format(self.host))
+        self.logger.info('Connecting'.format(self.host))
         self.ftp = FTP_Retry(self.host, timeout=settings.FTP_INDEX_TIMEOUT)
-        print('Logging in as {}:{}'.format(self.user, self.passwd))
+        self.logger.info('Logging in as {}:{}'.format(self.user, self.passwd))
         self.ftp.login(self.user, self.passwd)
 
 class Index(object):
@@ -124,11 +130,13 @@ if __name__ == '__main__':
     ftps = cur.fetchall()
     ftp_db.close()
     index = Index(settings.INDEX_DIR)
-    for ftp in ftps:
+    for (host,) in ftps:
+        logger.info('Begin indexing {}'.format(host))
         try:
-            ftp_indexer = FTP_Indexer(index, ftp[0], settings.FTP_USER, settings.FTP_PASSWD)
+            ftp_indexer = FTP_Indexer(index, host, settings.FTP_USER, settings.FTP_PASSWD)
             ftp_indexer.walk()
         except MLSD_NotSupported:
-            print('Error: FTP MLSD not supported on {}'.format(ftp[0]), file=sys.stderr)
+            logger.warning('FTP MLSD not supported on {}'.format(host))
         except:
-            print(traceback.format_exc(), file=sys.stderr)
+            logger.exception('Exception occured during indexing of {}'.format(host))
+        logger.info('End indexing {}'.format(host))
