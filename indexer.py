@@ -61,13 +61,21 @@ class FTP_Indexer(object):
             for (filename, attrs) in files:
                 if filename[0] == '.':
                     continue
-                self.logger.debug('{} {}'.format(os.path.join(_(path), _(filename)), attrs))
+
+                try:
+                    filename_u = _(filename)
+                    path_u = _(path)
+                except UnicodeDecodeError:
+                    self.logger.warning('Could not decode {}'.format(os.path.join(path, filename)))
+                    continue
+
+                self.logger.debug('{} {}'.format(os.path.join(path_u, filename_u), attrs))
                 if attrs['type'] == 'dir':
                     self.ftp.cwd(filename)
                     self._walk(os.path.join(path, filename))
                     self.ftp.cwd(path)
                 elif attrs['type'] == 'file':
-                    self.index.add(self.host, _(filename), _(path), int(attrs['size']) // 1024)
+                    self.index.add(self.host, filename_u, path_u, int(attrs['size']) // 1024)
         except (OSError, ftplib.error_reply): # timeout or desynchronization
             self._new_ftp()
             self.ftp.cwd(path)
