@@ -76,6 +76,8 @@ class FTP_Indexer(object):
                     self.ftp.cwd(path)
                 elif attrs['type'] == 'file':
                     self.index.add(self.host, filename_u, path_u, int(attrs['size']) // 1024)
+        except ftplib.error_perm:
+            self.logger.info('Permission denied on {}'.format(os.path.join(path, filename)))
         except (OSError, ftplib.error_reply): # timeout or desynchronization
             self._new_ftp()
             self.ftp.cwd(path)
