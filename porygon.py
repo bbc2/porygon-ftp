@@ -15,6 +15,9 @@ def sizeof_format(num):
         num /= 1024.0
     return format_str.format(num, 'T')
 
+def get_url(host, path=''):
+    return 'ftp://{}:{}@{}{}'.format(settings.FTP_USER, settings.FTP_PASSWD, host, path)
+
 def get_ftp(ftp_db):
     import sqlite3
     ftp_db = sqlite3.connect(ftp_db)
@@ -22,7 +25,7 @@ def get_ftp(ftp_db):
     cur.execute('select host from ftp')
     ftps = cur.fetchall()
     ftp_db.close()
-    return [{ 'host': ftp[0], 'url': 'ftp://rez:rez@%s' % ftp[0] } for ftp in ftps]
+    return [{ 'host': host, 'url': get_url(host) } for (host,) in ftps]
 
 @app.route('/', methods=['POST', 'GET'])
 def search():
@@ -32,8 +35,8 @@ def search():
         hits = index.search(query)
         for hit in hits:
             hit['size'] = sizeof_format(int(hit['size']) * 1024)
-            hit['url'] = 'ftp://rez:rez@%s%s' % (hit['host'], os.path.join(hit['path'], hit['filename']))
-            hit['dir_url'] = 'ftp://rez:rez@%s%s' % (hit['host'], os.path.join(hit['path']))
+            hit['url'] = get_url(hit['host'], os.path.join(hit['path'], hit['filename']))
+            hit['dir_url'] = get_url(hit['host'], os.path.join(hit['path']))
 
         return render_template('search.html', hits=hits, hit_page=True, query=query)
     else:
