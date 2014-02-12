@@ -115,7 +115,8 @@ class Index(object):
 
     def search(self, txt):
         with self.db.searcher() as searcher:
-            parser = MultifieldParser(['filename', 'path'], self.db.schema)
+            # iter([]) instead of just [] is a hack to circumvent a bug in Whoosh
+            parser = MultifieldParser(['filename', 'path'], self.db.schema, plugins=iter([]))
             query = parser.parse(txt)
             results = searcher.search(query, limit=settings.HIT_LIMIT,
                                       sortedby="size", reverse=True)
