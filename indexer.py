@@ -8,7 +8,7 @@ import logging
 import logging.config
 from datetime import datetime
 from whoosh.query import DateRange, Term
-from whoosh.fields import Schema, TEXT, ID, NUMERIC, DATETIME
+from whoosh.fields import Schema, TEXT, NUMERIC, DATETIME
 from whoosh.analysis import FancyAnalyzer, CharsetFilter
 from whoosh.support.charset import accent_map
 from whoosh.index import create_in, open_dir
@@ -94,8 +94,7 @@ class Index(object):
             os.mkdir(indexdir)
         if erase or os.listdir(indexdir) == []:
             analyzer = FancyAnalyzer() | CharsetFilter(accent_map)
-            schema = Schema(fullpath=ID(unique=True),
-                            last_updated=DATETIME(),
+            schema = Schema(last_updated=DATETIME(),
                             filename=TEXT(stored=True, analyzer=analyzer),
                             host=TEXT(stored=True),
                             path=TEXT(stored=True, analyzer=analyzer),
@@ -123,8 +122,7 @@ class Index(object):
             return([{'host': hit['host'], 'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
 
     def add(self, host, filename, path, size):
-        self.writer.add_document(fullpath=os.path.join(path, filename),
-                                 last_updated=datetime.utcnow(),
+        self.writer.add_document(last_updated=datetime.utcnow(),
                                  host=host,
                                  filename=filename,
                                  path=path,
