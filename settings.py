@@ -1,8 +1,8 @@
-# Number of parallel scanner processes
-FTP_SCAN_PROCESS_COUNT = 20
-
 # Scanner timeout for FTP connections (seconds)
 FTP_SCAN_TIMEOUT = 5
+
+# Maximum number of concurrent connections. Should be lower than `ulimit -n`
+FTP_SCAN_FILE_LIMIT = 900
 
 # Indexer timeout for FTP connections (seconds)
 FTP_INDEX_TIMEOUT = 30

@@ -15,29 +15,32 @@ FTP_USER = 'rez'
 FTP_PASSWD = '35zero'
 
 # Logging configuration
-LOGGING = {
-    'version': 1,
-    'formatters': {
-        'simple': {
-            'format': '%(asctime)s:%(name)s:%(levelname)s:%(message)s'
-        }
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'level': 'DEBUG',
-            'formatter': 'simple',
-            'stream': 'ext://sys.stdout',
+def _logging_conf(filename):
+    return {
+        'version': 1,
+        'formatters': {
+            'simple': {
+                'format': '%(asctime)s:%(name)s:%(levelname)s:%(message)s'
+            }
         },
-        'file': {
-            'class': 'logging.FileHandler',
-            'level': 'INFO',
-            'formatter': 'simple',
-            'filename': '/var/local/porygon/log',
-        }
-    },
-    'root': {
-        'level': 'DEBUG',
-        'handlers': ['console', 'file'],
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'level': 'DEBUG',
+                'formatter': 'simple',
+                'stream': 'ext://sys.stdout',
+            },
+            'file': {
+                'class': 'logging.FileHandler',
+                'level': 'INFO',
+                'formatter': 'simple',
+                'filename': '/var/local/porygon/{}.log'.format(filename),
+            },
+        },
+        'root': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file'],
+        },
     }
-}
+SCAN_LOGGING = _logging_conf('scanner')
+INDEX_LOGGING = _logging_conf('indexer')

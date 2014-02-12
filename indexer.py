@@ -17,7 +17,7 @@ from ftp_retry import FTP_Retry
 
 import settings
 
-logging.config.dictConfig(settings.LOGGING)
+logging.config.dictConfig(settings.INDEX_LOGGING)
 logger = logging.getLogger()
 
 def _(string):
@@ -32,7 +32,7 @@ class FTP_Indexer(object):
         self.host = host
         self.user = user
         self.passwd = passwd
-        self.logger = logging.getLogger(format(host))
+        self.logger = logging.getLogger(host)
         self._new_ftp()
 
     def walk(self):
