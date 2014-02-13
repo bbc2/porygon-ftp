@@ -15,10 +15,9 @@ from whoosh.index import create_in, open_dir
 from whoosh.qparser import MultifieldParser
 from ftp_retry import FTP_Retry
 
-import settings
+DEFAULT_TIMEOUT = 30
 
-logging.config.dictConfig(settings.INDEX_LOGGING)
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 def _(string):
     return string.encode('latin-1').decode('utf-8')
@@ -27,11 +26,12 @@ class MLSD_NotSupported(Exception):
     pass
 
 class FTP_Indexer(object):
-    def __init__(self, index, host, user, passwd):
+    def __init__(self, index, host, user, passwd, timeout=DEFAULT_TIMEOUT):
         self.index = index
         self.host = host
         self.user = user
         self.passwd = passwd
+        self.timeout = timeout
         self.logger = logging.getLogger(host)
         self._new_ftp()
 
@@ -84,7 +84,7 @@ class FTP_Indexer(object):
 
     def _new_ftp(self):
         self.logger.info('Connecting'.format(self.host))
-        self.ftp = FTP_Retry(self.host, timeout=settings.FTP_INDEX_TIMEOUT)
+        self.ftp = FTP_Retry(self.host, timeout=self.timeout)
         self.logger.info('Logging in as {}:{}'.format(self.user, self.passwd))
         self.ftp.login(self.user, self.passwd)
 
@@ -112,12 +112,12 @@ class Index(object):
     def cancel(self):
         self.writer.cancel()
 
-    def search(self, txt):
+    def search(self, txt, hit_limit=0):
         with self.db.searcher() as searcher:
             # iter([]) instead of just [] is a hack to circumvent a bug in Whoosh
             parser = MultifieldParser(['filename', 'path'], self.db.schema, plugins=iter([]))
             query = parser.parse(txt)
-            results = searcher.search(query, limit=settings.HIT_LIMIT,
+            results = searcher.search(query, limit=hit_limit,
                                       sortedby="size", reverse=True)
             return([{'host': hit['host'], 'filename': hit['filename'], 'size': hit['size'], 'path': hit['path']} for hit in results])
 
@@ -133,6 +133,9 @@ class Index(object):
 
 if __name__ == '__main__':
     import sqlite3
+    import settings
+
+    logging.config.dictConfig(settings.INDEX_LOGGING)
     ftp_db = sqlite3.connect(settings.FTP_DB)
     cur = ftp_db.cursor()
     cur.execute('select host from ftp')

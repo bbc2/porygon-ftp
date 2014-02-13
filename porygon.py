@@ -37,7 +37,7 @@ def search():
     if query == '': return redirect(url_for('home'))
 
     index = Index(settings.INDEX_DIR)
-    hits = index.search(query)
+    hits = index.search(query, hit_limit=settings.HIT_LIMIT)
     for hit in hits:
         hit['size'] = sizeof_format(int(hit['size']) * 1024)
         hit['url'] = get_url(hit['host'], os.path.join(hit['path'], hit['filename']))
