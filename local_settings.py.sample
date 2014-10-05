@@ -1,23 +1,19 @@
-# This is configuration example. Copy this file to local_settings.py and
-# customize it to your needs.
+# This is a configuration example. Copy this file to local_settings.py and
+# customize it to fit your needs.  You can also override any variable from
+# settings.py.
 
-# Index directory
-INDEX_DIR = '/var/local/porygon/index'
+from settings import *
 
-# FTP SQLite database
-FTP_DB = '/var/local/porygon/ftp.db'
+# FTP username
+USER = 'john'
 
-# Network to be scanned
-NETWORK = '10.0.0.0/24'
-
-# FTP credentials
-FTP_USER = 'rez'
-FTP_PASSWD = '35zero'
+# FTP password
+PASSWD = 'secret'
 
 # Logging configuration
-def _logging_conf(filename):
-    return {
+LOGGING = {
         'version': 1,
+        'disable_existing_loggers': False,
         'formatters': {
             'simple': {
                 'format': '%(asctime)s:%(name)s:%(levelname)s:%(message)s'
@@ -34,7 +30,7 @@ def _logging_conf(filename):
                 'class': 'logging.FileHandler',
                 'level': 'INFO',
                 'formatter': 'simple',
-                'filename': '/var/local/porygon/{}.log'.format(filename),
+                'filename': 'porygon.log',
             },
         },
         'root': {
@@ -42,5 +38,3 @@ def _logging_conf(filename):
             'handlers': ['console', 'file'],
         },
     }
-SCAN_LOGGING = _logging_conf('scanner')
-INDEX_LOGGING = _logging_conf('indexer')

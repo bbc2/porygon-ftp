@@ -1,13 +1,29 @@
-# Scanner timeout for FTP connections (seconds)
-FTP_SCAN_TIMEOUT = 5
+# FTP port
+PORT = 21
 
-# Maximum number of concurrent connections. Should be lower than `ulimit -n`
-FTP_SCAN_FILE_LIMIT = 900
+# Maximum duration from an initial probe to a successful login
+SCAN_TIMEOUT = 20
 
-# Indexer timeout for FTP connections (seconds)
-FTP_INDEX_TIMEOUT = 30
+# Maximum simultaneous scan tasks
+MAX_SCAN_TASKS = 1000
 
-# Maximum number of hits to return in a search
-HIT_LIMIT = 200
+# Interval between scans
+SCAN_INTERVAL = 2 * 60
 
-from local_settings import *
+# Offline time after which a server is forgotten
+OFFLINE_DELAY = 2 * 3600
+
+# Timeout for the connection to an FTP server during indexation
+INDEX_TIMEOUT = 30
+
+# Maximum simultaneous index tasks
+MAX_INDEX_TASKS = 2
+
+# Minimum interval between index tasks on a given host
+INDEX_INTERVAL = 5 * 60
+
+# Maximum number of FTP errors allowed during the indexation of a server
+MAX_INDEX_ERRORS = 10
+
+# Signals to catch
+SOFT_SIGNALS = ['SIGINT', 'SIGTERM']
