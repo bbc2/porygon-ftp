@@ -35,7 +35,8 @@ class Walker():
                 (files, dirs) = self.conn.ls(path)
                 self.todo += dirs
                 try:
-                    self.handler.handle([(_(path), _(name)) for (path, name) in files])
+                    self.handler.index([(_(path), _(name), size)
+                                        for (path, name, size) in files])
                 except BadEncoding as exc:
                     self.logger.warn('Bad encoding in %s: %s', path, exc.args[0])
 
@@ -81,7 +82,7 @@ class Connection():
         for (name, attrs) in listing:
             if name[0] == '.': continue
             if attrs['type'] == 'file':
-                files.append((path, name))
+                files.append((path, name, attrs['size']))
             elif attrs['type'] == 'dir':
                 dirs.append(os.path.join(path, name))
 
@@ -107,13 +108,16 @@ class Connection():
 
 if __name__ == '__main__':
     import sys
+    import socket
     import local_settings as conf
-    from printer import Printer
+    from backends import get_backend
 
     host = sys.argv[1]
 
     logging.config.dictConfig(conf.LOGGING)
-    printer = Printer(host, 21)
-    walker = Walker(host, 21, user='rez', passwd='rez', timeout=conf.INDEX_TIMEOUT,
-            max_errors=conf.MAX_INDEX_ERRORS, handler=printer)
+    backend = get_backend(conf.BACKEND['NAME'])
+    ip = socket.gethostbyname(host)
+    walker = Walker(host, conf.PORT, user='rez', passwd='rez',
+                    timeout=conf.INDEX_TIMEOUT, max_errors=conf.MAX_INDEX_ERRORS,
+                    handler=backend.IndexHandler(conf.BACKEND, ip))
     walker.walk()

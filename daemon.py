@@ -13,16 +13,18 @@ from walker import Walker
 
 logger = logging.getLogger(__name__)
 
-class Daemon():
-    def __init__(self, loop, port, user, passwd, network, get_indexer, scan_interval,
-                 scan_timeout, max_scans, offline_delay, index_interval, index_timeout,
-                 max_index_tasks, max_index_errors):
+class Daemon:
+    def __init__(self, loop, port, user, passwd, network, scan_handler,
+                 get_index_handler, scan_interval, scan_timeout, max_scans,
+                 offline_delay, index_interval, index_timeout, max_index_tasks,
+                 max_index_errors):
         self.loop = loop
         self.port = port
         self.user = user
         self.passwd = passwd
         self.network = network
-        self.get_indexer = get_indexer
+        self.scan_handler = scan_handler
+        self.get_index_handler = get_index_handler
         self.scan_interval = timedelta(seconds=scan_interval)
         self.scan_timeout = scan_timeout
         self.max_scans = max_scans
@@ -39,17 +41,16 @@ class Daemon():
 
     @asyncio.coroutine
     def _scan(self):
-        scanner = Scanner(loop, port=21, user=self.user, passwd=self.passwd,
+        scanner = Scanner(self.loop, port=21, user=self.user, passwd=self.passwd,
                 timeout=self.scan_timeout, max_tasks=self.max_scans)
         return (yield from scanner.scan(self.network))
 
-    # Can be run in parallel for different hosts.
+    # Run for each host and in parallel depending on max_index_tasks.
     def _index(self, ip):
         logger.info('Start indexation %s', ip)
         walker = Walker(ip, self.port, self.user, self.passwd, self.index_timeout,
-                        self.max_index_errors, self.get_indexer(ip, self.port))
-        del self.submitted[ip]
-        self.busy.add(ip)
+                        self.max_index_errors, self.get_index_handler(ip, self.port))
+        self.loop.call_soon_threadsafe(self._mark_busy, ip) # avoid race condition
         try:
             walker.walk()
         except Exception as exc:
@@ -57,6 +58,10 @@ class Daemon():
             return (ip, False)
         else:
             return (ip, True)
+
+    def _mark_busy(self, ip):
+        del self.submitted[ip]
+        self.busy.add(ip)
 
     # Called when _index has finished.
     def _indexed(self, future):
@@ -85,30 +90,32 @@ class Daemon():
     def _process(self, online_hosts):
         now = datetime.now(timezone.utc)
 
-        # Add new hosts to the self.hosts dict and update existing ones
+        # Add new hosts to the self.hosts dict and update existing ones.
         for (ip, info) in self.hosts.items(): info['online'] = False
         online_attrs = { 'online': True, 'last_online': now }
         self.hosts.update({ ip: online_attrs for ip in online_hosts })
 
-        # Forget about hosts that have been offline for too much time
+        # Forget about hosts that have been offline for too much time.
         limit = now - self.offline_delay
         old = (ip for (ip, info) in self.hosts.items() if info['last_online'] < limit)
         for ip in old:
             del self.hosts[ip]
             logger.debug('Forgot about %s', ip)
 
-        # Schedule indexation for online hosts that are not about to be indexed.
+        # Schedule indexation for online hosts that are not already scheduled.
         for ip in online_hosts:
             info = self.hosts[ip]
             if ip not in self.scheduled and ip not in self.submitted \
                     and ip not in self.busy:
                 try:
-                    delta = (now - info['last_indexed'] + self.index_interval)
-                    delay = delta.seconds
+                    delay = (now - info['last_indexed'] + self.index_interval).seconds
                 except KeyError:
                     delay = 0
                 self.scheduled[ip] = self.loop.call_later(delay, self._submit, ip)
                 logger.debug('Scheduled indexation of %s in %d seconds', ip, delay)
+
+        with self.scan_handler:
+            self.scan_handler.update(self.hosts)
 
     @asyncio.coroutine
     def _sleep(self, delta):
@@ -136,7 +143,7 @@ class Daemon():
         if signame is not None:
             self.loop.remove_signal_handler(getattr(signal, signame))
 
-        # Cancel pending tasks
+        # Cancel pending tasks.
         for (ip, handle) in self.scheduled.items():
             logger.debug('Cancelled handle for %s: %s', ip, handle.cancel())
         for (ip, future) in self.submitted.items():
@@ -146,19 +153,21 @@ class Daemon():
         self.should_stop = True
         if hasattr(self, 'sleep'): self.sleep.cancel()
 
-if __name__ == '__main__':
-    from printer import Printer
+def main():
+    from backends import get_backend
     import local_settings as conf
 
     loop = asyncio.get_event_loop()
     logging.config.dictConfig(conf.LOGGING)
-    get_printer = lambda ip, port: Printer(ip, port)
+    backend = get_backend(conf.BACKEND['NAME'])
+    scan_handler = backend.ScanHandler(conf.BACKEND)
+    get_index_handler = lambda ip, port: backend.IndexHandler(conf.BACKEND, ip)
     daemon = Daemon(loop, port=21, user='rez', passwd='rez', network='10.2.0.0/28',
-            get_indexer=get_printer, scan_interval=conf.SCAN_INTERVAL,
-            scan_timeout=conf.SCAN_TIMEOUT, max_scans=conf.MAX_SCAN_TASKS,
-            offline_delay=conf.OFFLINE_DELAY, index_interval=conf.INDEX_INTERVAL,
-            index_timeout=conf.INDEX_TIMEOUT, max_index_tasks=conf.MAX_INDEX_TASKS,
-            max_index_errors=conf.MAX_INDEX_ERRORS)
+            scan_handler=scan_handler, get_index_handler=get_index_handler,
+            scan_interval=conf.SCAN_INTERVAL, scan_timeout=conf.SCAN_TIMEOUT,
+            max_scans=conf.MAX_SCAN_TASKS, offline_delay=conf.OFFLINE_DELAY,
+            index_interval=conf.INDEX_INTERVAL, index_timeout=conf.INDEX_TIMEOUT,
+            max_index_tasks=conf.MAX_INDEX_TASKS, max_index_errors=conf.MAX_INDEX_ERRORS)
     for name in conf.SOFT_SIGNALS:
         loop.add_signal_handler(getattr(signal, name), functools.partial(daemon.stop, name))
 
@@ -168,3 +177,6 @@ if __name__ == '__main__':
     finally:
         loop.close()
         logger.info('Daemon stopped')
+
+if __name__ == '__main__':
+    main()

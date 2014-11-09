@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from datetime import datetime
 from limiter import JoinableSemaphore
 from ipaddress import IPv4Address, ip_network
 
@@ -102,9 +103,9 @@ if __name__ == '__main__':
     network = sys.argv[1]
     logging.config.dictConfig(conf.LOGGING)
 
+    start_time = datetime.utcnow()
     loop = asyncio.get_event_loop()
     scanner = Scanner(loop, port=conf.PORT, user=conf.USER, passwd=conf.PASSWD,
                       timeout=conf.SCAN_TIMEOUT, max_tasks=conf.MAX_SCAN_TASKS)
     ftps = loop.run_until_complete(scanner.scan(network))
     loop.close()
-    logger.info('Open FTPs: %s', ', '.join([str(ip) for ip in ftps]))

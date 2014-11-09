@@ -1,11 +1,13 @@
 # encoding: utf-8
 
 import os
+import re
+from slugify import slugify
 from flask import Flask, render_template, request, url_for, redirect
-from indexer import Index
 app = Flask(__name__)
 
-import settings
+from backends import get_backend
+import local_settings as conf
 
 def sizeof_format(num):
     format_str = '{:.1f}\xa0{}'
@@ -16,31 +18,33 @@ def sizeof_format(num):
     return format_str.format(num, 'T')
 
 def get_url(host, path=''):
-    return 'ftp://{}:{}@{}{}'.format(settings.FTP_USER, settings.FTP_PASSWD, host, path)
+    return 'ftp://{}:{}@{}'.format(conf.USER, conf.PASSWD, os.path.join(host, path))
 
-def get_ftp(ftp_db):
-    import sqlite3
-    ftp_db = sqlite3.connect(ftp_db)
-    cur = ftp_db.cursor()
-    cur.execute('select host from ftp')
-    ftps = cur.fetchall()
-    ftp_db.close()
-    return [{ 'host': host, 'url': get_url(host) } for (host,) in ftps]
+def get_ftp():
+    handler = get_backend(conf.BACKEND['NAME'])
+    return [{ 'host': host, 'url': get_url(host) }
+            for host in handler.get_hosts(conf.BACKEND)]
 
 @app.route('/')
 def home():
-    return render_template('search.html', ftps=get_ftp(settings.FTP_DB))
+    return render_template('search.html', ftps=get_ftp())
 
 @app.route('/search')
 def search():
     query = request.args.get('query', '')
     if query == '': return redirect(url_for('home'))
 
-    index = Index(settings.INDEX_DIR)
-    hits = index.search(query, hit_limit=settings.HIT_LIMIT)
+    # Normalize terms and then make sure they only contain alphanumeric characters
+    simple_terms = [slugify(term, separator='') for term in query.split(' ')]
+    safe_terms = [re.sub(r'[^a-zA-Z0-9]+', '', term) for term in simple_terms]
+
+    backend = get_backend(conf.BACKEND['NAME'])
+    host_ips = backend.get_hosts(conf.BACKEND).keys()
+    hits = backend.search(conf.BACKEND, safe_terms, host_ips, limit=100)
+
     for hit in hits:
-        hit['size'] = sizeof_format(int(hit['size']) * 1024)
-        hit['url'] = get_url(hit['host'], os.path.join(hit['path'], hit['filename']))
+        hit['size'] = sizeof_format(hit['size'])
+        hit['url'] = get_url(hit['host'], os.path.join(hit['path'], hit['name']))
         hit['dir_url'] = get_url(hit['host'], os.path.join(hit['path']))
 
     return render_template('search.html', hits=hits, hit_page=True, query=query)
