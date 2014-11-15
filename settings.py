@@ -1,12 +1,6 @@
 # FTP port
 PORT = 21
 
-BACKEND = {
-    'NAME': 'sqlite',
-    'SCAN_DB': 'scan.db',
-    'INDEX_DB': 'index.db',
-}
-
 # Maximum duration from an initial probe to a successful login
 SCAN_TIMEOUT = 20
 

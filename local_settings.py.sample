@@ -10,6 +10,13 @@ USER = 'john'
 # FTP password
 PASSWD = 'secret'
 
+# Database configuration
+BACKEND = {
+    'NAME': 'sqlite',
+    'SCAN_DB': '/var/local/porygon/scan.db',
+    'INDEX_DB': '/var/local/porygon/index.db',
+}
+
 # Logging configuration
 LOGGING = {
         'version': 1,
@@ -30,7 +37,7 @@ LOGGING = {
                 'class': 'logging.FileHandler',
                 'level': 'INFO',
                 'formatter': 'simple',
-                'filename': 'porygon.log',
+                'filename': '/var/local/porygon/porygon.log',
             },
         },
         'root': {
