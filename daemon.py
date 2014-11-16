@@ -162,12 +162,13 @@ def main():
     backend = get_backend(conf.BACKEND['NAME'])
     scan_handler = backend.ScanHandler(conf.BACKEND)
     get_index_handler = lambda ip, port: backend.IndexHandler(conf.BACKEND, ip)
-    daemon = Daemon(loop, port=21, user='rez', passwd='rez', network='10.2.0.0/28',
-            scan_handler=scan_handler, get_index_handler=get_index_handler,
-            scan_interval=conf.SCAN_INTERVAL, scan_timeout=conf.SCAN_TIMEOUT,
-            max_scans=conf.MAX_SCAN_TASKS, offline_delay=conf.OFFLINE_DELAY,
-            index_interval=conf.INDEX_INTERVAL, index_timeout=conf.INDEX_TIMEOUT,
-            max_index_tasks=conf.MAX_INDEX_TASKS, max_index_errors=conf.MAX_INDEX_ERRORS)
+    daemon = Daemon(loop, port=conf.PORT, user=conf.USER, passwd=conf.PASSWD,
+                    network=conf.NETWORK, scan_handler=scan_handler,
+                    get_index_handler=get_index_handler, scan_interval=conf.SCAN_INTERVAL,
+                    scan_timeout=conf.SCAN_TIMEOUT, max_scans=conf.MAX_SCAN_TASKS,
+                    offline_delay=conf.OFFLINE_DELAY, index_interval=conf.INDEX_INTERVAL,
+                    index_timeout=conf.INDEX_TIMEOUT, max_index_tasks=conf.MAX_INDEX_TASKS,
+                    max_index_errors=conf.MAX_INDEX_ERRORS)
     for name in conf.SOFT_SIGNALS:
         loop.add_signal_handler(getattr(signal, name), functools.partial(daemon.stop, name))
 
