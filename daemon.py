@@ -93,7 +93,7 @@ class Daemon:
         # Add new hosts to the self.hosts dict and update existing ones.
         for (ip, info) in self.hosts.items(): info['online'] = False
         online_attrs = { 'online': True, 'last_online': now }
-        self.hosts.update({ ip: online_attrs for ip in online_hosts })
+        self.hosts.update({ ip: dict(online_attrs, name=n) for (ip, n) in online_hosts })
 
         # Forget about hosts that have been offline for too much time.
         limit = now - self.offline_delay
@@ -103,7 +103,7 @@ class Daemon:
             logger.debug('Forgot about %s', ip)
 
         # Schedule indexation for online hosts that are not already scheduled.
-        for ip in online_hosts:
+        for (ip, _) in online_hosts:
             info = self.hosts[ip]
             if ip not in self.scheduled and ip not in self.submitted \
                     and ip not in self.busy:

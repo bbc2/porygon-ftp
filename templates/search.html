@@ -45,7 +45,7 @@
     <table id="hits">
       {% for hit in hits %}
       <tr>
-        <td class="host">{{ hit.host }}</td>
+        <td class="host">{{ hit.host.name }}</td>
         <td class="path"><a href="{{ hit.dir_url }}">{{ hit.path }}</a></td>
         <td class="name"><a href="{{ hit.url }}">{{ hit.name }}</a></td>
         <td class="size">{{ hit.size }}</td>
@@ -66,7 +66,7 @@
         <ul>
           {% if ftps %}
           {% for ftp in ftps %}
-          <li><a href="{{ ftp.url }}">{{ ftp.host }}</a></li>
+          <li><a href="{{ ftp.url }}">{{ ftp.name }}</a></li>
           {% endfor %}
           {% else %}
           aucun

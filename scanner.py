@@ -58,7 +58,7 @@ class Scanner():
     def _has_ftp(self, ip):
         try:
             (reader, writer) = yield from asyncio.open_connection(
-                    host=str(ip), port=self.port)
+                    host=ip, port=self.port)
             return (yield from self._connect_ftp(reader, writer))
         except OSError as exc:
             logger.debug('Connection refused on %s: %r', ip, exc)
@@ -74,7 +74,9 @@ class Scanner():
     def _scan_port(self, ip):
         has_ftp = yield from self._has_ftp(ip)
         logger.debug('Probed %s, has_ftp: %s', ip, has_ftp)
-        if has_ftp: self.ftp_hosts.add(str(ip))
+        if has_ftp:
+            (name, _) = yield from self.loop.getnameinfo((ip, self.port))
+            self.ftp_hosts.add((ip, name))
         yield from self.limiter.release()
 
     def cancel_slow_task(self, task):
@@ -87,7 +89,7 @@ class Scanner():
         hosts = ip_network(network).hosts()
         for ip in hosts:
             yield from self.limiter.acquire()
-            task = asyncio.Task(self._scan_port(ip))
+            task = asyncio.Task(self._scan_port(str(ip)))
             if self.timeout is not None:
                 self.loop.call_later(self.timeout, self.cancel_slow_task, task)
             logger.debug('Scheduled: %s', ip)

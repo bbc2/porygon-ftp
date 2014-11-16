@@ -59,10 +59,10 @@ class IndexHandler:
 def get_hosts(conf):
     con = sqlite3.connect(conf['SCAN_DB'])
     cur = con.cursor()
-    cur.execute('select ip, last_online, last_indexed from hosts')
-    return { ip: { 'last_online': o, 'last_indexed': i } for (ip, o, i) in cur }
+    cur.execute('select ip, name, last_online, last_indexed from hosts')
+    return { ip: { 'name': n, 'last_online': o, 'last_indexed': i } for (ip, n, o, i) in cur }
 
-def search(conf, terms, host_ips, limit=None):
+def search(conf, terms, hosts, limit=None):
     con = sqlite3.connect(conf['INDEX_DB'])
     cur = con.cursor()
     match_param = ' '.join(terms)
@@ -70,7 +70,7 @@ def search(conf, terms, host_ips, limit=None):
 
     query = '''select path, name, ip, size from files
                where files match ? and ip in ({})
-               limit ?'''.format(','.join('?' * len(host_ips)))
-    bindings = (match_param,) + tuple(host_ips) + (limit_param,)
+               limit ?'''.format(','.join('?' * len(hosts)))
+    bindings = (match_param,) + tuple(hosts) + (limit_param,)
     cur.execute(query, bindings)
-    return [{ 'path': p, 'name': n, 'host': ip, 'size': float(s) } for (p, n, ip, s) in cur]
+    return [{ 'path': p, 'name': n, 'host': hosts[ip], 'size': float(s) } for (p, n, ip, s) in cur]

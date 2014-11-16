@@ -22,8 +22,8 @@ def get_url(host, path=''):
 
 def get_ftp():
     handler = get_backend(conf.BACKEND['NAME'])
-    return [{ 'host': host, 'url': get_url(host) }
-            for host in handler.get_hosts(conf.BACKEND)]
+    return [{ 'name': info['name'], 'url': get_url(info['name']) }
+            for (_, info) in handler.get_hosts(conf.BACKEND).items()]
 
 @app.route('/')
 def home():
@@ -39,13 +39,13 @@ def search():
     safe_terms = [re.sub(r'[^a-zA-Z0-9]+', '', term) for term in simple_terms]
 
     backend = get_backend(conf.BACKEND['NAME'])
-    host_ips = backend.get_hosts(conf.BACKEND).keys()
-    hits = backend.search(conf.BACKEND, safe_terms, host_ips, limit=100)
+    hosts = backend.get_hosts(conf.BACKEND)
+    hits = backend.search(conf.BACKEND, safe_terms, hosts, limit=100)
 
     for hit in hits:
         hit['size'] = sizeof_format(hit['size'])
-        hit['url'] = get_url(hit['host'], os.path.join(hit['path'], hit['name']))
-        hit['dir_url'] = get_url(hit['host'], os.path.join(hit['path']))
+        hit['url'] = get_url(hit['host']['name'], os.path.join(hit['path'], hit['name']))
+        hit['dir_url'] = get_url(hit['host']['name'], os.path.join(hit['path']))
 
     return render_template('search.html', hits=hits, hit_page=True, query=query)
 
