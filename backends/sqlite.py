@@ -31,6 +31,8 @@ class IndexHandler:
         self.ip = ip
         self.path = conf['INDEX_DB']
         with sqlite3.connect(self.path) as con:
+            # Enable WAL (https://www.sqlite.org/wal.html) to allow reads while writing.
+            con.execute('pragma journal_mode=wal')
             con.execute('create virtual table if not exists files using fts4('
                         'path text,'
                         'name text,'
@@ -40,10 +42,6 @@ class IndexHandler:
 
     def __enter__(self):
         self.con = sqlite3.connect(self.path)
-
-        # Enable WAL (https://www.sqlite.org/wal.html) to allow reads while writing.
-        self.con.execute('pragma journal_type=wal')
-
         self.cur = self.con.cursor()
         self.cur.execute('delete from files where ip=?', (self.ip,))
 
