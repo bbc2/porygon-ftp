@@ -1,10 +1,10 @@
-html, body {
-    font-family: helvetica, sans;
-    padding: 0;
+* {
     margin: 0;
+    padding: 0;
 }
 
 body {
+    font-family: helvetica, sans;
     text-align: center;
 }
 
@@ -102,8 +102,11 @@ table {
 
 td {
     padding: .1em .5em;
-    white-space: nowrap;
     font-size: .9em;
+}
+
+td.path, td.name {
+    word-wrap: break-word;
 }
 
 td.path {
