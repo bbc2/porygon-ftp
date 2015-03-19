@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec /srv/porygon/daemon.py

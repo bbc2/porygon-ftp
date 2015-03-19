@@ -1,9 +1,0 @@
-#!/bin/bash
-
-# Enable jessie and pin it so that wheezy packages remain top priority
-echo 'deb http://ftp.debian.org/debian/ jessie main non-free contrib' >> /etc/apt/sources.list
-cat << EOF > /etc/apt/preferences.d/10jessie
-Package: *
-Pin: release n=jessie
-Pin-Priority: 200
-EOF

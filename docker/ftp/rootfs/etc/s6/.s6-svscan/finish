@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Wait for all services to stop before stopping the main process.  Otherwise, services may
+# not have enough time to shut down gracefully as Docker will terminate the container.
+s6-svwait -a -t 5000 -d /etc/s6/*

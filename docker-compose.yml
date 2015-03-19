@@ -1,0 +1,9 @@
+app:
+    build: app
+    links:
+        - ftp
+    ports:
+        - "5000:5000"
+
+ftp:
+    build: docker/ftp
