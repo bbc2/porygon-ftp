@@ -40,6 +40,17 @@ if __name__ == '__main__':
             'another_file': 1024 * 1024,
             'yet_another': 17 * 1024 * 1024,
         },
+        'another_folder': {
+            'a_file_with_a_tiny_little_bit_long_name_that'
+            'you_would_not_have_wished_for_in_any_case': 1,
+            'a file with a tiny little bit long name that'
+            'you would not have wished for in any case, but this time with spaces': 1,
+            'nested_folder': {
+                'file_{:02}'.format(n): 1 for n in range(0, 100)
+            },
+        },
     }
+
+    print(fs)
 
     main(root, fs)
