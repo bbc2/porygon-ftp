@@ -58,7 +58,8 @@ def get_hosts(conf):
     con = sqlite3.connect(conf['SCAN_DB'])
     cur = con.cursor()
     cur.execute('select ip, name, last_online, last_indexed from hosts')
-    return { ip: { 'name': n, 'last_online': o, 'last_indexed': i } for (ip, n, o, i) in cur }
+    return { ip: { 'name': n, 'last_online': o, 'last_indexed': i }
+            for (ip, n, o, i) in cur }
 
 def search(conf, terms, hosts, limit=None):
     con = sqlite3.connect(conf['INDEX_DB'])
@@ -77,4 +78,5 @@ def search(conf, terms, hosts, limit=None):
         # file table has not been created yet
         return []
 
-    return [{ 'path': p, 'name': n, 'host': hosts[ip], 'size': float(s) } for (p, n, ip, s) in cur]
+    return [{ 'path': p, 'name': n, 'host': hosts[ip], 'size': float(s) }
+            for (p, n, ip, s) in cur]
