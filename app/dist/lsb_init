@@ -15,7 +15,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="FTP indexer"
 NAME=porygon
-DAEMON=/srv/porygon/daemon.py
+DAEMON=/srv/porygon/app/daemon.py
 DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
