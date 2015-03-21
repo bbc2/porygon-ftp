@@ -70,5 +70,11 @@ def search(conf, terms, hosts, limit=None):
                where files match ? and ip in ({})
                limit ?'''.format(','.join('?' * len(hosts)))
     bindings = (match_param,) + tuple(hosts) + (limit_param,)
-    cur.execute(query, bindings)
+
+    try:
+        cur.execute(query, bindings)
+    except sqlite3.OperationalError:
+        # file table has not been created yet
+        return []
+
     return [{ 'path': p, 'name': n, 'host': hosts[ip], 'size': float(s) } for (p, n, ip, s) in cur]
