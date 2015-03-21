@@ -175,6 +175,8 @@ def main():
     logger.info('Daemon started')
     try:
         loop.run_until_complete(daemon.run())
+    except Exception as exc:
+        logger.error('Daemon error: %r', exc)
     finally:
         loop.close()
         logger.info('Daemon stopped')
