@@ -6,7 +6,7 @@ from slugify import slugify
 from flask import Flask, render_template, request, url_for, redirect
 app = Flask(__name__)
 
-from backends import get_backend
+from db import get_backend
 import local_settings as conf
 
 def sizeof_format(num):
@@ -21,9 +21,13 @@ def get_url(host, path=''):
     return 'ftp://{}:{}@{}'.format(conf.USER, conf.PASSWD, os.path.join(host, path))
 
 def get_ftp():
-    handler = get_backend(conf.BACKEND['NAME'])
+    store = get_backend(conf.STORE['NAME']).Store(conf.STORE['CONF'])
+
+    with store.scan_db() as db:
+        hosts = db.get_hosts()
+
     return [{ 'name': info['name'], 'url': get_url(info['name']) }
-            for (_, info) in handler.get_hosts(conf.BACKEND).items()]
+            for (_, info) in hosts.items()]
 
 @app.route('/')
 def home():
@@ -38,9 +42,13 @@ def search():
     simple_terms = [slugify(term, separator='') for term in query.split(' ')]
     safe_terms = [re.sub(r'[^a-zA-Z0-9]+', '', term) for term in simple_terms]
 
-    backend = get_backend(conf.BACKEND['NAME'])
-    hosts = backend.get_hosts(conf.BACKEND)
-    hits = backend.search(conf.BACKEND, safe_terms, hosts, limit=100)
+    store = get_backend(conf.STORE['NAME']).Store(conf.STORE['CONF'])
+
+    with store.scan_db() as db:
+        hosts = db.get_hosts()
+
+    with store.index_db() as db:
+        hits = db.search(safe_terms, hosts, limit=100)
 
     for hit in hits:
         hit['size'] = sizeof_format(hit['size'])

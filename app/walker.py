@@ -21,22 +21,27 @@ def _(latin1_string):
         raise BadEncoding(latin1_string)
 
 class Walker():
-    def __init__(self, ip, port, user, passwd, timeout, max_errors, handler):
+    def __init__(self, ip, port, user, passwd, timeout, max_errors, db):
+        self.ip = ip
         self.logger = logging.getLogger('Walker({})'.format(ip))
         self.conn = Connection(ip, port, user, passwd, timeout, self.logger, max_errors)
+        self.db = db
+
         self.todo = ['']
-        self.handler = handler
 
     def walk(self):
-        with self.handler:
+        with self.db:
+            self.db.delete(self.ip)
             while True:
                 try: path, *self.todo = self.todo
                 except ValueError: break # run until todo is empty
                 (files, dirs) = self.conn.ls(path)
                 self.todo += dirs
+
+                file_info = ((_(path), _(name), size) for (path, name, size) in files)
+
                 try:
-                    self.handler.index([(_(path), _(name), size)
-                                        for (path, name, size) in files])
+                    self.db.index(self.ip, file_info)
                 except BadEncoding as exc:
                     self.logger.warn('Bad encoding in %s: %s', path, exc.args[0])
 
@@ -110,14 +115,14 @@ if __name__ == '__main__':
     import sys
     import socket
     import local_settings as conf
-    from backends import get_backend
+    from store import get_backend
 
     host = sys.argv[1]
 
     logging.config.dictConfig(conf.LOGGING)
-    backend = get_backend(conf.BACKEND['NAME'])
+    store = get_backend(conf.BACKEND['NAME']).Store(conf.BACKEND['CONF'])
     ip = socket.gethostbyname(host)
     walker = Walker(host, conf.PORT, user='rez', passwd='rez',
                     timeout=conf.INDEX_TIMEOUT, max_errors=conf.MAX_INDEX_ERRORS,
-                    handler=backend.IndexHandler(conf.BACKEND, ip))
+                    store=self.store.index_db())
     walker.walk()

@@ -14,17 +14,15 @@ from walker import Walker
 logger = logging.getLogger(__name__)
 
 class Daemon:
-    def __init__(self, loop, port, user, passwd, network, scan_handler,
-                 get_index_handler, scan_interval, scan_timeout, max_scans,
-                 offline_delay, index_interval, index_timeout, max_index_tasks,
-                 max_index_errors):
+    def __init__(self, loop, port, user, passwd, network, store, scan_interval,
+                 scan_timeout, max_scans, offline_delay, index_interval, index_timeout,
+                 max_index_tasks, max_index_errors):
         self.loop = loop
         self.port = port
         self.user = user
         self.passwd = passwd
         self.network = network
-        self.scan_handler = scan_handler
-        self.get_index_handler = get_index_handler
+        self.store = store
         self.scan_interval = timedelta(seconds=scan_interval)
         self.scan_timeout = scan_timeout
         self.max_scans = max_scans
@@ -32,6 +30,7 @@ class Daemon:
         self.index_interval = timedelta(seconds=index_interval)
         self.index_timeout = index_timeout
         self.max_index_errors = max_index_errors
+
         self.executor = ThreadPoolExecutor(max_workers=max_index_tasks)
         self.scheduled = {} # handle for addresses of servers scheduled for indexation
         self.submitted = {} # future for addresses of servers about to be indexed
@@ -49,7 +48,7 @@ class Daemon:
     def _index(self, ip):
         logger.info('Start indexation %s', ip)
         walker = Walker(ip, self.port, self.user, self.passwd, self.index_timeout,
-                        self.max_index_errors, self.get_index_handler(ip, self.port))
+                        self.max_index_errors, self.store.index_db())
         self.loop.call_soon_threadsafe(self._mark_busy, ip) # avoid race condition
         try:
             walker.walk()
@@ -100,7 +99,7 @@ class Daemon:
         old = (ip for (ip, info) in self.hosts.items() if info['last_online'] < limit)
         for ip in old:
             del self.hosts[ip]
-            logger.debug('Forgot about %s', ip)
+            logger.info('Forgot about %s', ip)
 
         # Schedule indexation for online hosts that are not already scheduled.
         for (ip, _) in online_hosts:
@@ -114,8 +113,8 @@ class Daemon:
                 self.scheduled[ip] = self.loop.call_later(delay, self._submit, ip)
                 logger.debug('Scheduled indexation of %s in %d seconds', ip, delay)
 
-        with self.scan_handler:
-            self.scan_handler.update(self.hosts)
+        with self.store.scan_db() as db:
+            db.update(self.hosts)
 
     @asyncio.coroutine
     def _sleep(self, delta):
@@ -154,17 +153,15 @@ class Daemon:
         if hasattr(self, 'sleep'): self.sleep.cancel()
 
 def main():
-    from backends import get_backend
+    from db import get_backend
     import local_settings as conf
 
     loop = asyncio.get_event_loop()
     logging.config.dictConfig(conf.LOGGING)
-    backend = get_backend(conf.BACKEND['NAME'])
-    scan_handler = backend.ScanHandler(conf.BACKEND)
-    get_index_handler = lambda ip, port: backend.IndexHandler(conf.BACKEND, ip)
+    backend = get_backend(conf.STORE['NAME'])
+    store = backend.Store(conf.STORE['CONF'])
     daemon = Daemon(loop, port=conf.PORT, user=conf.USER, passwd=conf.PASSWD,
-                    network=conf.NETWORK, scan_handler=scan_handler,
-                    get_index_handler=get_index_handler, scan_interval=conf.SCAN_INTERVAL,
+                    network=conf.NETWORK, store=store, scan_interval=conf.SCAN_INTERVAL,
                     scan_timeout=conf.SCAN_TIMEOUT, max_scans=conf.MAX_SCAN_TASKS,
                     offline_delay=conf.OFFLINE_DELAY, index_interval=conf.INDEX_INTERVAL,
                     index_timeout=conf.INDEX_TIMEOUT, max_index_tasks=conf.MAX_INDEX_TASKS,

@@ -14,10 +14,12 @@ USER = 'john'
 PASSWD = 'secret'
 
 # Database configuration
-BACKEND = {
+STORE = {
     'NAME': 'sqlite',
-    'SCAN_DB': '/var/local/porygon/scan.db',
-    'INDEX_DB': '/var/local/porygon/index.db',
+    'CONF': {
+        'scan_file': '/var/local/porygon/scan.db',
+        'index_file': '/var/local/porygon/index.db',
+    },
 }
 
 # Logging configuration
