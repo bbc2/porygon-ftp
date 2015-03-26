@@ -1,7 +1,18 @@
 import os
 import sqlite3
 
-class _ScanDatabase:
+class _Database:
+    def __enter__(self):
+        self.con = sqlite3.connect(self.db)
+        self.cur = self.con.cursor()
+        return self
+
+    def __exit__(self, type, value, tb):
+        self.con.commit()
+        self.cur.close()
+        self.con.close()
+
+class _ScanDatabase(_Database):
     def __init__(self, db):
         self.db = db
         with sqlite3.connect(self.db) as con:
@@ -11,11 +22,6 @@ class _ScanDatabase:
                         'name text,'
                         'last_online text not null,'
                         'last_indexed text)')
-
-    def __enter__(self):
-        self.con = sqlite3.connect(self.db)
-        self.cur = self.con.cursor()
-        return self
 
     def update(self, hosts, erase=True):
         if erase: self.cur.execute('delete from hosts')
@@ -29,12 +35,7 @@ class _ScanDatabase:
         return { ip: { 'name': n, 'last_online': o, 'last_indexed': i }
                 for (ip, n, o, i) in self.cur }
 
-    def __exit__(self, type, value, tb):
-        self.con.commit()
-        self.cur.close()
-        self.con.close()
-
-class _IndexDatabase:
+class _IndexDatabase(_Database):
     def __init__(self, db):
         self.db = db
         with sqlite3.connect(self.db) as con:
@@ -46,11 +47,6 @@ class _IndexDatabase:
                         'ip text,'
                         'size integer,'
                         'notindexed=ip, notindexed=size, tokenize=unicode61)')
-
-    def __enter__(self):
-        self.con = sqlite3.connect(self.db)
-        self.cur = self.con.cursor()
-        return self
 
     def delete(self, ip):
         self.cur.execute('delete from files where ip=?', (ip,))
@@ -72,11 +68,6 @@ class _IndexDatabase:
 
         return [{ 'path': p, 'name': n, 'host': hosts[ip], 'size': float(s) }
                 for (p, n, ip, s) in self.cur]
-
-    def __exit__(self, type, value, tb):
-        self.con.commit()
-        self.cur.close()
-        self.con.close()
 
 class Store:
     def __init__(self, conf):
