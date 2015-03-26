@@ -96,7 +96,7 @@ class Daemon:
 
         # Forget about hosts that have been offline for too much time.
         limit = now - self.offline_delay
-        old = (ip for (ip, info) in self.hosts.items() if info['last_online'] < limit)
+        old = [ip for (ip, info) in self.hosts.items() if info['last_online'] < limit]
         for ip in old:
             del self.hosts[ip]
             logger.info('Forgot about %s', ip)
