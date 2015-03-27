@@ -113,8 +113,11 @@ class Daemon:
                 self.scheduled[ip] = self.loop.call_later(delay, self._submit, ip)
                 logger.debug('Scheduled indexation of %s in %d seconds', ip, delay)
 
+        # Update databases
         with self.store.scan_db() as db:
             db.update(self.hosts)
+        with self.store.index_db() as db:
+            db.prune([ip for ip in self.hosts])
 
     @asyncio.coroutine
     def _sleep(self, delta):

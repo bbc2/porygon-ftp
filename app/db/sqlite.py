@@ -51,6 +51,11 @@ class _IndexDatabase(_Database):
     def delete(self, ip):
         self.cur.execute('delete from files where ip=?', (ip,))
 
+    def prune(self, hosts_to_keep):
+        set_param = '({})'.format(','.join('?' * len(hosts_to_keep)))
+        query = 'delete from files where ip not in {}'.format(set_param)
+        self.cur.execute(query, hosts_to_keep)
+
     def index(self, ip, files):
         self.cur.executemany('insert into files values (?, ?, ?, ?)',
                 ((path, name, ip, size) for (path, name, size) in files))
