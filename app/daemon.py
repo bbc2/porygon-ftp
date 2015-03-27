@@ -53,7 +53,7 @@ class Daemon:
         try:
             walker.walk()
         except Exception as exc:
-            logger.warn('Exception during indexation of %s: %r', ip, exc)
+            logger.exception('Exception during indexation of %s: %r', ip, exc)
             return (ip, False)
         else:
             return (ip, True)
@@ -175,8 +175,6 @@ def main():
     logger.info('Daemon started')
     try:
         loop.run_until_complete(daemon.run())
-    except Exception as exc:
-        logger.error('Daemon error: %r', exc)
     finally:
         loop.close()
         logger.info('Daemon stopped')
