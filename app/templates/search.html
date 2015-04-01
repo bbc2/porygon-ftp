@@ -1,83 +1,25 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Porygon Search</title>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}" />
-  <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon_16.png') }}" />
-</head>
-<body>
-  <div id="all" {% if hit_page %}class="hit_page"{% endif %}>
-    <header>
-      <a href="{{ url_for('search') }}">
-        <div id="logo">
-        </div>
-      </a>
-    </header>
-    <form action="search" method="get">
-      <table>
-        {% if hit_page %}
-        <tr>
-          <td>
-            <input type="text" name="query" {% if query %}value="{{ query }}"{% endif %} />
-          </td>
-          <td>
-            <input type="submit" value="Go !" class="hit_page" />
-          </td>
-          </p>
-        </tr>
-        {% else %}
-        <tr>
-          <td>
-            <input type="text" name="query" />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <input type="submit" value="Go !" />
-          </td>
-        </tr>
-        {% endif %}
-      </table>
-    </form>
-    {% if hit_page %}
-    {% if hits %}
-    <table id="hits">
-      {% for hit in hits %}
-      <tr>
-        <td class="host">{{ hit.host.name }}</td>
-        <td class="path"><a href="{{ hit.dir_url }}">{{ hit.path }}</a></td>
-        <td class="name"><a href="{{ hit.url }}">{{ hit.name }}</a></td>
-        <td class="size">{{ hit.size }}</td>
-      </tr>
-      {% endfor %}
-    </table>
-    {% else %}
-    <p>
-      Pas de résultat
-    </p>
-    {% endif %}
-    {% else %}
-    <div id="ftp_list">
-      <div class="box_title">
-        Serveurs en ligne
-      </div>
-      <div class="box_content">
-        <ul>
-          {% if ftps %}
-          {% for ftp in ftps %}
-          <li><a href="{{ ftp.url }}">{{ ftp.name }}</a></li>
-          {% endfor %}
-          {% else %}
-          aucun
-          {% endif %}
-        </ul>
-      </div>
-    </div>
-    {% endif %}
-    <footer>
-      Suggestion ou bug&nbsp;: <a href="mailto:bertrandbc@gmail.com">bertrandbc@gmail.com</a>
-    </footer>
-  </div>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+{% if hits %}
+<table class="hit_list">
+  <tr>
+    <th>serveur</th>
+    <th>chemin</th>
+    <th>nom</th>
+    <th>taille</th>
+  </tr>
+  {% for hit in hits %}
+  <tr>
+    <td class="host">{{ hit.host.name }}</td>
+    <td class="path"><a href="{{ hit.dir_url }}">{{ hit.path }}/</a></td>
+    <td class="name"><a href="{{ hit.url }}">{{ hit.name }}</a></td>
+    <td class="size">{{ hit.size }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>
+  aucun résultat
+</p>
+{% endif %}
+{% endblock %}

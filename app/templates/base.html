@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Porygon search</title>
+    <link rel="stylesheet" type="text/css"
+          href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="shortcut icon"
+          href="{{ url_for('static', filename='img/favicon_16.png') }}" />
+  </head>
+  <body>
+    <div id="top" class="{% block top_div_attr %}normal{% endblock %}">
+      <header>
+        <a href="{{ url_for('home') }}">
+          <img id="logo" src="{{ url_for('static', filename='img/logo.svg') }}"
+               alt="Porygon">
+        </a>
+      </header>
+      <form action="search" method="get">
+        <div>
+          <input type="text" name="query" {% if query %}value="{{ query }}"{% endif %}>
+          <input type="submit" value="Go">
+        </div>
+        <div class="option">
+          <label>
+            <input type="checkbox" name="online" {% if online %}checked{% endif %}>
+            <div>en ligne uniquement</div>
+          </label>
+        </div>
+      </form>
+    </div>
+    <div id="content">
+      {% block content %}{% endblock %}
+    </div>
+    <footer>
+      suggestion ou bug&nbsp;: <a href="https://github.com/bbc2/porygon-ftp">github</a>
+    </footer>
+  </body>
+</html>

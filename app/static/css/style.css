@@ -1,0 +1,178 @@
+@font-face {
+  font-family: roboto-regular;
+  src: url(/static/font/roboto_regular.ttf);
+}
+
+@font-face {
+  font-family: roboto-light;
+  src: url(/static/font/roboto_light.ttf);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: roboto-regular;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: #00c7bd;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #00eee2;
+}
+
+table {
+  border-spacing: 0;
+  text-align: center;
+}
+
+tr {
+  transition: 0.1s linear 0s;
+}
+
+tr:hover {
+  background: #fff1fc;
+  transition: 0.1s linear 0s;
+}
+
+th {
+  padding: .3ex 1.4ex;
+  color: #aaa;
+}
+
+td {
+  padding: .3ex 0;
+}
+
+div#top {
+  display: flex;
+  margin: 4ex 0 5ex 0;
+}
+
+img#logo {
+  height: 15ex;
+}
+
+form > div {
+  display: flex;
+  flex-direction: row;
+}
+
+input[type="text"],
+input[type="submit"] {
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  outline: none 0px;
+  font-family: roboto-regular; /* for Chrome */
+}
+
+input[type="text"] {
+  font-size: 1.3em;
+  width: 50ex;
+  background: #f6f6f6;
+  transition: 0.1s linear 0s;
+  padding: .7ex 1ex;
+  margin-right: 1.5ex;
+}
+
+input[type="text"]:hover {
+  background: #fbfbfb;
+  transition: 0.1s linear 0s;
+}
+
+input[type="text"]:focus {
+  border: 1px solid #aaa;
+  transition: 0.1s linear 0s;
+}
+
+input[type="submit"] {
+  font-size: 1em;
+  font-weight: bold;
+  color: #444;
+  background: #ddd;
+  transition: 0.2s linear 0s;
+  padding: 0 2ex;
+}
+
+input[type="submit"]:hover,
+input[type="submit"]:focus {
+  color: #fff;
+  background: #ff68e5;
+  border-color: #ff68e5;
+  transition: 0.2s linear 0s;
+}
+
+div.option {
+  margin: 1ex 0 0 3ex;
+}
+
+div.option > label {
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  font-size: .9em;
+}
+
+input[type=checkbox] {
+  margin-right: 1ex;
+}
+
+/* specific to `normal` or `compact` */
+
+div#top.normal {
+  flex-direction: column;
+  align-items: center;
+}
+
+div#top.normal header {
+  margin-bottom: 4ex;
+}
+
+div#top.compact {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+div#top.compact header {
+  margin-right: 3ex;
+}
+
+div#top.compact img#logo {
+  height: 11ex;
+}
+
+div#content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 3.5ex;
+}
+
+td.host,
+td.size {
+  padding-left: 2ex;
+  padding-right: 2ex;
+}
+
+td.path {
+  font-family: roboto-light;
+  text-align: right;
+}
+
+td.name {
+  text-align: left;
+}
+
+footer {
+  text-align: center;
+  font-size: .9em;
+  margin-bottom: 2ex;
+}

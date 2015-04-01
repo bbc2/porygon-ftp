@@ -20,20 +20,33 @@ class _ScanDatabase(_Database):
             con.execute('create table if not exists hosts ('
                         'ip text primary key on conflict replace,'
                         'name text,'
+                        'online boolean,'
                         'last_online text not null,'
-                        'last_indexed text)')
+                        'last_indexed text,'
+                        'file_count integer,'
+                        'size)')
 
-    def update(self, hosts, erase=True):
-        if erase: self.cur.execute('delete from hosts')
-        self.cur.executemany('insert into hosts values (?, ?, ?, ?)',
-                ((ip, info.get('name', None), info['last_online'],
-                  info.get('last_indexed', None)) for (ip, info) in hosts.items()))
+    def set_hosts(self, hosts):
+        self.cur.execute('delete from hosts')
+
+        values = ((ip,
+                   info.get('name', None),
+                   info['online'],
+                   info['last_online'],
+                   info.get('last_indexed', None),
+                   info.get('file_count', None),
+                   info.get('size', None))
+                  for (ip, info) in hosts.items())
+
+        self.cur.executemany('insert into hosts values (?, ?, ?, ?, ?, ?, ?)', values)
 
     def get_hosts(self):
-        self.cur.execute('select ip, name, last_online, last_indexed from hosts')
+        self.cur.execute('select ip, name, online, last_online, last_indexed,'
+                         'file_count, size from hosts')
 
-        return { ip: { 'name': n, 'last_online': o, 'last_indexed': i }
-                for (ip, n, o, i) in self.cur }
+        return { ip: { 'name': n, 'online': o, 'last_online': l, 'last_indexed': i,
+                       'file_count': f, 'size': s }
+                 for (ip, n, o, l, i, f, s) in self.cur }
 
 class _IndexDatabase(_Database):
     def __init__(self, db):
@@ -73,6 +86,11 @@ class _IndexDatabase(_Database):
 
         return [{ 'path': p, 'name': n, 'host': hosts[ip], 'size': float(s) }
                 for (p, n, ip, s) in self.cur]
+
+    def get_stat(self, ip):
+        self.cur.execute('select count(*), sum(size) from files where ip = ?', (ip,))
+        ((file_count, size),) = self.cur
+        return { 'file_count': file_count, 'size': size }
 
 class Store:
     def __init__(self, conf):

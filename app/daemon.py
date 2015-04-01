@@ -54,9 +54,12 @@ class Daemon:
             walker.walk()
         except Exception as exc:
             logger.exception('Exception during indexation of %s: %r', ip, exc)
-            return (ip, False)
+            return { 'ip': ip, 'success': False }
         else:
-            return (ip, True)
+            with self.store.index_db() as db:
+                stat = db.get_stat(ip)
+            return { 'ip': ip, 'success': True,
+                     'file_count': stat['file_count'], 'size': stat['size'] }
 
     def _mark_busy(self, ip):
         del self.submitted[ip]
@@ -64,12 +67,18 @@ class Daemon:
 
     # Called when _index has finished.
     def _indexed(self, future):
-        now = datetime.now(timezone.utc)
-        (ip, success) = future.result()
+        result = future.result()
+        ip = result['ip']
         info = self.hosts[ip]
 
-        info['last_indexed'] = now
-        info['last_index_success'] = success
+        if result['success']:
+            info['last_indexed'] = datetime.now(timezone.utc)
+            info['file_count'] = result['file_count']
+            info['size'] = result['size']
+
+        with self.store.scan_db() as db:
+            db.set_hosts(self.hosts)
+
         logger.info('Finished indexation of %s', ip)
 
         self.busy.remove(ip)
@@ -91,8 +100,9 @@ class Daemon:
 
         # Add new hosts to the self.hosts dict and update existing ones.
         for (ip, info) in self.hosts.items(): info['online'] = False
-        online_attrs = { 'online': True, 'last_online': now }
-        self.hosts.update({ ip: dict(online_attrs, name=n) for (ip, n) in online_hosts })
+        self.hosts.update({ ip: dict(self.hosts.get(ip, {}), name=n,
+                                     online=True, last_online=now)
+                           for (ip, n) in online_hosts })
 
         # Forget about hosts that have been offline for too much time.
         limit = now - self.offline_delay
@@ -115,7 +125,7 @@ class Daemon:
 
         # Update databases
         with self.store.scan_db() as db:
-            db.update(self.hosts)
+            db.set_hosts(self.hosts)
         with self.store.index_db() as db:
             db.prune([ip for ip in self.hosts])
 
