@@ -87,7 +87,12 @@ class Daemon:
     def _indexed(self, future):
         result = future.result()
         ip = result['ip']
-        info = self.hosts[ip]
+
+        try:
+            info = self.hosts[ip]
+        except KeyError:
+            logger.info('Finished indexing %s but it has been forgotten already', ip)
+            return
 
         if result['success']:
             info['last_indexed'] = datetime.now(timezone.utc)
@@ -107,7 +112,7 @@ class Daemon:
 
     def _submit(self, ip):
         del self.scheduled[ip]
-        if self.hosts[ip]['online']:
+        if ip in self.hosts and self.hosts[ip]['online']:
             logger.debug('Submit indexation of %s to tread pool', ip)
             future = self.executor.submit(self._index, ip)
             future.add_done_callback(self._indexed)
