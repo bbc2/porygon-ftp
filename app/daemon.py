@@ -5,7 +5,7 @@ import asyncio
 import logging
 import logging.config
 import functools
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 
 from scanner import Scanner
@@ -95,7 +95,7 @@ class Daemon:
             return
 
         if result['success']:
-            info['last_indexed'] = datetime.now(timezone.utc)
+            info['last_indexed'] = datetime.utcnow()
             info['file_count'] = result['file_count']
             info['size'] = result['size']
 
@@ -119,7 +119,7 @@ class Daemon:
             self.submitted[ip] = future
 
     def _process(self, online_hosts):
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
 
         # Add new hosts to the self.hosts dict and update existing ones.
         for (ip, info) in self.hosts.items(): info['online'] = False

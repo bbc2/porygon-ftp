@@ -1,8 +1,8 @@
 FROM bbc2/base
 MAINTAINER Bertrand Bonnefoy-Claudet <bertrandbc@gmail.com>
 
-RUN apt-get update && apt-get install -y python3 python3-pip \
-    && pip3 install python-slugify flask \
+RUN apt-get update && apt-get install -y python3 python3-pip python3-arrow \
+    && pip3 install Flask python-slugify \
     && mkdir -p /var/local/porygon
 
 COPY . /srv/porygon

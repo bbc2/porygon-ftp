@@ -2,6 +2,7 @@
 
 import os
 import re
+import arrow
 from slugify import slugify
 from flask import Flask, render_template, request, url_for, redirect
 app = Flask(__name__)
@@ -23,6 +24,12 @@ def format_size(num):
 def url_of(host, path=''):
     return 'ftp://{}:{}@{}'.format(conf.USER, conf.PASSWD, os.path.join(host, path))
 
+def humanize(date):
+    if date is None:
+        return None
+
+    return arrow.get(date).humanize(locale='fr')
+
 def get_servers():
     store = get_backend(conf.STORE['NAME']).Store(conf.STORE['CONF'])
 
@@ -30,7 +37,7 @@ def get_servers():
         hosts = db.get_hosts()
 
     return [{ 'name': info['name'], 'url': url_of(info['name']),
-              'last_indexed': info['last_indexed'],
+              'last_indexed': humanize(info['last_indexed']),
               'file_count': info['file_count'], 'size': format_size(info['size']) }
             for (_, info) in hosts.items()]
 
