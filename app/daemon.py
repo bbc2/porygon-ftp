@@ -44,6 +44,21 @@ class Daemon:
                 timeout=self.scan_timeout, max_tasks=self.max_scans)
         return (yield from scanner.scan(self.network))
 
+    def _submit_pruning(self):
+        future = self.executor.submit(self._prune)
+        future.add_done_callback(self._pruned)
+
+    # Executed in a separate thread
+    def _prune(self):
+        logger.info('Pruning started')
+        with self.store.index_db() as db:
+            db.prune([ip for ip in self.hosts])
+
+    # Called when self._prune has finished
+    def _pruned(self, future):
+        logger.info('Pruning complete')
+        self.loop.call_later(self.index_interval.seconds, self._submit_pruning)
+
     # Run for each host and in parallel depending on max_index_tasks.
     def _index(self, ip):
         logger.info('Start indexation %s', ip)
@@ -123,11 +138,9 @@ class Daemon:
                 self.scheduled[ip] = self.loop.call_later(delay, self._submit, ip)
                 logger.debug('Scheduled indexation of %s in %d seconds', ip, delay)
 
-        # Update databases
+        # Update scan database
         with self.store.scan_db() as db:
             db.set_hosts(self.hosts)
-        with self.store.index_db() as db:
-            db.prune([ip for ip in self.hosts])
 
     @asyncio.coroutine
     def _sleep(self, delta):
@@ -143,6 +156,10 @@ class Daemon:
     @asyncio.coroutine
     def run(self):
         try:
+            # Schedule database pruning
+            self.loop.call_soon(self._submit_pruning)
+
+            # Main loop: scan and sleep
             while not self.should_stop:
                 self._process((yield from self._scan()))
                 yield from self._sleep(self.scan_interval)

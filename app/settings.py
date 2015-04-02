@@ -17,7 +17,7 @@ OFFLINE_DELAY = 24 * 3600
 INDEX_TIMEOUT = 30
 
 # Maximum simultaneous index tasks
-MAX_INDEX_TASKS = 2
+MAX_INDEX_TASKS = 1
 
 # Minimum interval between index tasks on a given host
 INDEX_INTERVAL = 4 * 3600
