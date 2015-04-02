@@ -1,0 +1,36 @@
+* porygon
+
+*porygon* searches the LAN for FTP servers and indexes them.  You can then search the
+index with a web interface.
+
+** Rationale
+   Students often want to make some of their files available to other mates.
+   They are also often connected to the same residence hall network and FTP
+   is a quick and quite universal solution.  Unfortunately, unlike specific
+   file sharing software, such an infrastructure lacks the search function.
+   Finding content is thus hard because everybody has its own way of (not)
+   keeping their file hierarchy clean and organized.
+
+   Enter *porygon*, a set of simple Python programs, coming with a scanner,
+   an indexer and a web search interface.  You can finally find what you're
+   looking for in a matter of seconds!
+
+** Testing
+   You can try porygon with Docker and [[https://docs.docker.com/compose/][docker-compose]]:
+
+   - Clone this repository
+   - Copy =app/local_settings.py.sample= to =app/local_settings.py= and edit the latter:
+
+     #+begin_src python
+     NETWORK = '172.17.0.0/24' # or whatever your Docker network is
+     USER = 'two'
+     PASSWD = 'flower'
+
+     # Override delays from `settings.py` to make testing faster.
+     SCAN_INTERVAL = 20
+     OFFLINE_DELAY = 200
+     INDEX_INTERVAL = 100
+     #+end_src
+
+   - Run =docker-compose up=
+   - Visit =http://localhost:5000=
