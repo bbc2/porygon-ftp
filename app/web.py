@@ -46,7 +46,7 @@ def search():
     online = request.args.get('online', 'off') == 'on'
 
     # Normalize terms and then make sure they only contain alphanumeric characters
-    simple_terms = [slugify(term, separator='') for term in query.split(' ')]
+    simple_terms = slugify(query, separator=' ').split(' ')
     safe_terms = [re.sub(r'[^a-zA-Z0-9]+', '', term) for term in simple_terms]
 
     store = get_backend(conf.STORE['NAME']).Store(conf.STORE['CONF'])
