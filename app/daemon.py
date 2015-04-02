@@ -9,7 +9,7 @@ from datetime import datetime, timezone, timedelta
 from concurrent.futures import ThreadPoolExecutor
 
 from scanner import Scanner
-from walker import Walker
+from walker import Walker, TooManyErrors
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +67,9 @@ class Daemon:
         self.loop.call_soon_threadsafe(self._mark_busy, ip) # avoid race condition
         try:
             walker.walk()
+        except TooManyErrors:
+            logger.warning('Could not index %s: too many errors', ip)
+            return { 'ip': ip, 'success': False }
         except Exception as exc:
             logger.exception('Exception during indexation of %s: %r', ip, exc)
             return { 'ip': ip, 'success': False }
