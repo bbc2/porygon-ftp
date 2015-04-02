@@ -165,10 +165,12 @@ td.size {
 td.path {
   font-family: roboto-light;
   text-align: right;
+  vertical-align: top;
 }
 
 td.name {
   text-align: left;
+  vertical-align: bottom;
 }
 
 footer {
