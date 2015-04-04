@@ -34,3 +34,5 @@ index with a web interface.
 
    - Run =docker-compose up=
    - Visit =http://localhost:5000=
+   - Increase or decrease the number of FTP servers with
+     =docker-compose scale ftp=<number>=
