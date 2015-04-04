@@ -5,8 +5,10 @@
     <title>Porygon search</title>
     <link rel="stylesheet" type="text/css"
           href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="shortcut icon"
-          href="{{ url_for('static', filename='img/favicon_16.png') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon_16.png') }}"
+          type="image/png" sizes="16x16" />
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon_32.png') }}"
+          type="image/png" sizes="32x32" />
   </head>
   <body>
     <div id="top" class="{% block top_div_attr %}normal{% endblock %}">
