@@ -177,6 +177,12 @@ td.size {
   padding-right: 2ex;
 }
 
+td.path,
+td.name {
+  min-width: 40ex;
+  word-break: break-all;
+}
+
 td.path {
   font-family: roboto-light;
   text-align: right;
