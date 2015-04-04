@@ -3,6 +3,10 @@
 *porygon* searches the LAN for FTP servers and indexes them.  You can then search the
 index with a web interface.
 
+#+caption: Main page of porygon
+#+name: porygon-screenshot
+[[https://github.com/bbc2/porygon-ftp/raw/master/misc/screenshot.png]]
+
 ** Rationale
    Students often want to make some of their files available to other mates.
    They are also often connected to the same residence hall network and FTP
