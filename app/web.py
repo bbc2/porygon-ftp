@@ -37,7 +37,7 @@ def get_servers():
         hosts = db.get_hosts()
 
     return [{ 'name': info['name'], 'url': url_of(info['name']),
-              'last_indexed': humanize(info['last_indexed']),
+              'online': info['online'], 'last_indexed': humanize(info['last_indexed']),
               'file_count': info['file_count'], 'size': format_size(info['size']) }
             for (_, info) in hosts.items()]
 

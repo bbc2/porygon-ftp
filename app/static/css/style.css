@@ -173,6 +173,16 @@ td.name {
   vertical-align: bottom;
 }
 
+tr.offline > td.host {
+  font-family: roboto-light;
+}
+
+tr.offline > td.host a,
+tr.offline > td.path a,
+tr.offline > td.name a {
+  color: #ff68e5;
+}
+
 footer {
   text-align: center;
   font-size: .9em;

@@ -9,7 +9,7 @@
     <th>taille</th>
   </tr>
   {% for server in servers %}
-  <tr>
+  <tr {% if not server.online %}class="offline"{% endif %}>
     <td class="host"><a href="{{ server.url }}">{{ server.name }}</a></td>
     <td class="last_indexed">{{ server.last_indexed|default('-', true) }}</td>
     <td class="file_count">{{ server.file_count|default('-', true) }}</td>

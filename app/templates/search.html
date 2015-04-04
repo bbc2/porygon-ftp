@@ -9,7 +9,7 @@
     <th>taille</th>
   </tr>
   {% for hit in hits %}
-  <tr>
+  <tr {% if not hit.host.online %}class="offline"{% endif %}>
     <td class="host">{{ hit.host.name }}</td>
     <td class="path"><a href="{{ hit.dir_url }}">{{ hit.path }}/</a></td>
     <td class="name"><a href="{{ hit.url }}">{{ hit.name }}</a></td>
