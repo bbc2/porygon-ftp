@@ -156,6 +156,21 @@ div#content {
   margin-bottom: 3.5ex;
 }
 
+div.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url('/static/img/empty.svg') center no-repeat;
+  background-size: contain;
+  height: 20ex;
+  width: 20ex;
+}
+
+div.empty > p {
+  text-align: center;
+  margin: 0 3ex;
+}
+
 td.host,
 td.size {
   padding-left: 2ex;
