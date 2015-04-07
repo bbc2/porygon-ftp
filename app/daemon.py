@@ -61,7 +61,7 @@ class Daemon:
 
     # Run for each host and in parallel depending on max_index_tasks.
     def _index(self, ip):
-        logger.info('Start indexation %s', ip)
+        logger.info('Start indexing %s', ip)
         walker = Walker(ip, self.port, self.user, self.passwd, self.index_timeout,
                         self.max_index_errors, self.store.index_db())
         self.loop.call_soon_threadsafe(self._mark_busy, ip) # avoid race condition
@@ -71,7 +71,7 @@ class Daemon:
             logger.warning('Could not index %s: too many errors', ip)
             return { 'ip': ip, 'success': False }
         except Exception as exc:
-            logger.exception('Exception during indexation of %s: %r', ip, exc)
+            logger.exception('Exception while indexing %s: %r', ip, exc)
             return { 'ip': ip, 'success': False }
         else:
             with self.store.index_db() as db:
@@ -102,13 +102,13 @@ class Daemon:
         with self.store.scan_db() as db:
             db.set_hosts(self.hosts)
 
-        logger.info('Finished indexation of %s', ip)
+        logger.info('Finished indexing %s', ip)
 
         self.busy.remove(ip)
         if info['online'] and not self.should_stop:
             delay = self.index_interval.seconds
             self.scheduled[ip] = self.loop.call_later(delay, self._submit, ip)
-            logger.debug('Scheduled subsequent indexation of %s in %d seconds', ip, delay)
+            logger.debug('Next indexation of %s in %d seconds', ip, delay)
 
     def _submit(self, ip):
         del self.scheduled[ip]
