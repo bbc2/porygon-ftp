@@ -141,7 +141,7 @@ class Daemon:
             if ip not in self.scheduled and ip not in self.submitted \
                     and ip not in self.busy:
                 try:
-                    delay = (now - info['last_indexed'] + self.index_interval).seconds
+                    delay = (info['last_indexed'] + self.index_interval - now).seconds
                 except KeyError:
                     delay = 0
                 self.scheduled[ip] = self.loop.call_later(delay, self._submit, ip)
