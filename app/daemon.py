@@ -88,6 +88,8 @@ class Daemon:
         result = future.result()
         ip = result['ip']
 
+        self.busy.remove(ip)
+
         try:
             info = self.hosts[ip]
         except KeyError:
@@ -104,7 +106,6 @@ class Daemon:
 
         logger.info('Finished indexing %s', ip)
 
-        self.busy.remove(ip)
         if info['online'] and not self.should_stop:
             delay = self.index_interval.seconds
             self.scheduled[ip] = self.loop.call_later(delay, self._submit, ip)
