@@ -40,3 +40,7 @@ index with a web interface.
    - Visit =http://localhost:5000=
    - Increase or decrease the number of FTP servers with
      =docker-compose scale ftp=<number>=
+
+** License
+
+   See =LICENSE= (MIT).
