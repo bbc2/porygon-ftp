@@ -20,7 +20,7 @@
       </header>
       <form action="search" method="get">
         <div>
-          <input type="text" name="query" {% if query %}value="{{ query }}"{% endif %}>
+          <input type="text" name="query" {% if query %}value="{{ query }}"{% endif %} autofocus>
           <input type="submit" value="Go">
         </div>
         <div class="option">
