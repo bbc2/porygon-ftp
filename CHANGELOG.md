@@ -1,5 +1,7 @@
 # Change Log
 
+## [Unreleased]
+
 ## [2.1] - 2015-10-26
 
 ### Added
@@ -25,6 +27,7 @@
 - FTP scanner, indexer and search engine with
   [Whoosh](https://bitbucket.org/mchaput/whoosh/wiki/Home)
 
+[Unreleased]: https://github.com/bbc2/porygon-ftp/compare/v2.1...master
 [2.1]: https://github.com/bbc2/porygon-ftp/compare/v2.0...v2.1
 [2.0]: https://github.com/bbc2/porygon-ftp/compare/v1.0...v2.0
 [1.0]: https://github.com/bbc2/porygon-ftp/compare/2da993c2...v1.0
